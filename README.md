@@ -1038,16 +1038,17 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 
 <div align="center">
 
-*Add your rendered images here!*
-
 ### Material Showcase
 ![Material Showcase](screenshots/materials.png)
 
-### Solar System
-![Solar System](screenshots/solar_system.png)
+### Object Showcase
+![Object Showcase](screenshots/object_showcase.png)
 
-### 10,000 Spheres (BVH Demonstration)
-![10K Spheres](screenshots/10k_spheres.png)
+### 100,000 Spheres (BVH Demonstration)
+![100K Spheres](screenshots/100k_spheres.png)
+
+### Wolf (Mesh Converter Demonstration)
+![Wolf](screenshots/wolf.png)
 
 </div>
 
