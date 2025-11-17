@@ -1039,7 +1039,7 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 <div align="center">
 
 ### Material Showcase
-![Material Showcase](screenshots/materials.png)
+![Material Showcase](screenshots/material.png)
 
 ### Object Showcase
 ![Object Showcase](screenshots/object_showcase.png)
