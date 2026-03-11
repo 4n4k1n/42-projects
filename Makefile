@@ -17,12 +17,17 @@ vpath %.cpp $(SRC_DIRS)
 ###############                  SOURCE FILES                     ##############
 ################################################################################
 
-SRCS := main.cpp
-OBJS := $(addprefix $(OBJ_DIR)/, $(SRCS:%.cpp=%.o))
+PARSER_FILES := parse_config.cpp
+PARSER := $(addprefix parsing/, $(PARSER_FILES))
+
+SRC_FILES := main.cpp webserv.cpp
+SRC := $(addprefix src/, $(SRC_FILES) $(PARSER))
 
 ################################################################################
 ###############                     RULES                         ##############
 ################################################################################
+
+OBJS := $(addprefix $(OBJ_DIR)/, $(SRC:%.cpp=%.o))
 
 # Compilation flags and linking options
 CFLAGS := -Wall -Wextra -Werror -Wno-shadow -std=c++17 $(addprefix -I, $(INC_DIRS))
@@ -42,6 +47,7 @@ $(NAME): $(OBJS)
 	@echo "$(COLOR_GREEN)Successful Compilation of $(NAME)$(COLOR_RESET)"
 
 $(OBJ_DIR)/%.o: %.cpp | $(OBJ_DIR)
+	@mkdir -p $(dir $@)
 	@echo "$(COLOR_GREEN)Compiling $<...$(COLOR_RESET)"
 	@$(CPP) $(CFLAGS) -c $< -o $@
 

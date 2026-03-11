@@ -1,11 +1,12 @@
-#include <iostream>
-#include <vector>
-#include <utility>
-#include "../inc/Colors.hpp"
 #include "webserv.hpp"
 
-int main()
+int main(int argc, char *argv[])
 {
-    std::cout << "arscher" << std::endl;
+    if(argc != 2)
+    {
+        std::cout << RED << "wrong number of arguments" << RESET << std::endl;
+        return(-1);
+    }
+    webServ(argv[1]);
     return (0);
 }
