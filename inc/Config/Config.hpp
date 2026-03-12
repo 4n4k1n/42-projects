@@ -4,6 +4,6 @@
 #include "ServerConfig.hpp"
 
 class Config {
-    public:
-        std::vector<ServerConfig> servers;
+	public:
+		std::vector<ServerConfig> servers;
 };

@@ -4,10 +4,11 @@
 #include "Config.hpp"
 
 class ConfigParser {
-    public:
-        Config parse(const std::string& filename);
+	public:
+		Config parse(const std::string& filename);
 
-    private:
-        void parseServer(std::stringstream& ss, Config& config);
-        void parseLocation(std::stringstream& ss, ServerConfig& server);
+	private:
+		void parseServer(std::stringstream& ss, Config& config);
+		void parseLocation(std::stringstream& ss, ServerConfig& server);
+		static std::string stripSemicolon(const std::string& s);
 };

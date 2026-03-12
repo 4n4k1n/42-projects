@@ -4,10 +4,10 @@
 #include "LocationConfig.hpp"
 
 class ServerConfig {
-    public:
-        int port;
-        std::string host;
-        std::string index;
+	public:
+		int port;
+		std::string host;
+		std::string index;
 
-        std::vector<LocationConfig> locations;
+		std::vector<LocationConfig> locations;
 };
