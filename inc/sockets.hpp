@@ -11,5 +11,9 @@
 #include <cstring>         
 #include <cerrno>
 #include <netdb.h>
+#include <vector>
+#include <poll.h>
 
+// sockets.cpp
 void setup_sockets(void);
+int create_socket_fds(std::string port);

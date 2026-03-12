@@ -1,8 +1,61 @@
 #include "sockets.hpp"
 
+void print_poll_fds(std::vector<struct pollfd> &poll_fds)
+{
+    std::cout << YELLOW << "Poll list size: " << poll_fds.size() << RESET << std::endl;
+    for (size_t i = 0; i < poll_fds.size(); i++){
+        std::cout << YELLOW << "FD[" << i << "]: " << poll_fds[i].fd << RESET << std::endl;
+    }
+}
+
+void event_loop(std::vector<struct pollfd> fds){
+	
+	while (true){
+		bool break_flag = false;
+		int ready = poll(fds.data(), fds.size(), -1);
+		if (ready == -1){
+			std::cerr << RED << "poll error" << RESET << std::endl;
+			break;
+		}
+		for(size_t i = 0; i < fds.size(); i++){
+			if(fds[i].revents & POLLIN){
+				std::cout << BLUE << "POLLIN" << RESET << std::endl;
+				break_flag = true;
+			}
+		}
+		if(break_flag)
+			break;
+	}
+
+}
+
 void setup_sockets(void)
 {
+    std::string port("8080");
+    
+    std::vector<struct pollfd> poll_fds;
 
+    int i = 0;
+    while(i < 1){
+        int socket_fd = create_socket_fds(port);
+        if(socket_fd == -1){
+			return ;
+        }
+        struct pollfd tmp;
+        tmp.fd = socket_fd;
+        tmp.events = POLLIN;
+        tmp.revents = 0;
+
+        poll_fds.push_back(tmp);
+        i++;
+    }
+	print_poll_fds(poll_fds);
+	event_loop(poll_fds);
+
+}
+
+int create_socket_fds(std::string port)
+{
     int socket_fd;
     struct addrinfo hints;
 
@@ -12,14 +65,13 @@ void setup_sockets(void)
     hints.ai_flags = AI_PASSIVE;
 
     int status;
-    std::string port("8080");
 
     struct addrinfo *results;
     status = getaddrinfo(NULL, port.c_str(), &hints, &results);
     if(status != 0)
     {
         std::cerr << RED << "getaddrinfo error: " << gai_strerror(status) << RESET << std::endl;
-        return ;
+        return (-1);
     }
 
     socket_fd = socket(results->ai_family, results->ai_socktype, results->ai_protocol);
@@ -27,7 +79,7 @@ void setup_sockets(void)
     {
         std::cerr << RED << "socket error: " << strerror(errno) << RESET << std::endl;
         freeaddrinfo(results);
-        return ;
+        return (-1);
     }
     std::cout << GREEN << "Socket created " << socket_fd << RESET << std::endl;
 
@@ -36,7 +88,7 @@ void setup_sockets(void)
     {
         std::cerr << RED << "setsockopt error: " << strerror(errno) << RESET << std::endl;
         freeaddrinfo(results);
-        return ;
+        return (-1);
     }
     std::cout << GREEN << "Socket options set"  << RESET << std::endl;
 
@@ -45,7 +97,7 @@ void setup_sockets(void)
     {
         std::cerr << RED << "fcntl error: " << strerror(errno) << RESET << std::endl;
         freeaddrinfo(results);
-        return ;
+        return (-1);
     }
     std::cout << GREEN << "Socket set to non-blocking" << RESET << std::endl;
 
@@ -54,7 +106,7 @@ void setup_sockets(void)
         std::cerr << RED << "bind error: " << strerror(errno) << RESET << std::endl;
         close(socket_fd);
         freeaddrinfo(results);
-        return ;
+        return (-1);
     }
     std::cout << GREEN << "Socket bound to port " << port << RESET << std::endl;
     if (listen(socket_fd, SOMAXCONN) == -1)
@@ -62,8 +114,10 @@ void setup_sockets(void)
         std::cerr << RED << "listen error: " << strerror(errno) << RESET << std::endl;
         close(socket_fd);
         freeaddrinfo(results);
-        return ;
+        return (-1);
     }
     std::cout << GREEN << "Socket listening on port " << port << RESET << std::endl;
     freeaddrinfo(results);
+
+    return(socket_fd);
 }
