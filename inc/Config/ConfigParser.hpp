@@ -5,7 +5,7 @@
 
 class ConfigParser {
     public:
-        Config parse(const std::string& config);
+        Config parse(const std::string& filename);
 
     private:
         void parseServer(std::stringstream& ss, Config& config);

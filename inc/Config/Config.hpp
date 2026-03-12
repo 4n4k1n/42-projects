@@ -1,8 +1,9 @@
 #pragma once
 
 #include "webserv.hpp"
-class ServerConfig;
+#include "ServerConfig.hpp"
 
 class Config {
-    std::vector<ServerConfig> servers;
+    public:
+        std::vector<ServerConfig> servers;
 };

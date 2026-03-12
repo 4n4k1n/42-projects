@@ -1,7 +1,7 @@
 #pragma once
 
 #include "webserv.hpp"
-class LocationConfig;
+#include "LocationConfig.hpp"
 
 class ServerConfig {
     public:
