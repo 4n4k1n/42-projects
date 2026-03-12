@@ -10,4 +10,4 @@ class ConfigParser {
     private:
         void parseServer(std::stringstream& ss, Config& config);
         void parseLocation(std::stringstream& ss, ServerConfig& server);
-}
+};
