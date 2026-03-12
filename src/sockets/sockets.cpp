@@ -2,6 +2,7 @@
 
 void setup_sockets(void)
 {
+
     int socket_fd;
     struct addrinfo hints;
 
@@ -28,6 +29,15 @@ void setup_sockets(void)
         freeaddrinfo(results);
         return ;
     }
+    std::cout << "Socket created " << socket_fd << std::endl;
 
+     int opt = 1;
+    if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+    {
+        std::cerr << "setsockopt error: " << strerror(errno) << std::endl;
+        freeaddrinfo(results);
+        return ;
+    }
+    std::cout << "Socket options set" << std::endl;
     freeaddrinfo(results);
 }
