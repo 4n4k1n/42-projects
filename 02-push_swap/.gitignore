@@ -1,0 +1,7 @@
+.vscode
+obj/**
+libft/obj/**
+libft/libft.a
+push_swap
+checker
+checker_Mac
