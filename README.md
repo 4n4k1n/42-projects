@@ -11,7 +11,7 @@
     ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝   ╚═╝   
 ```
 
-### ⚡ A Lightning-Fast, Distributed Ray Tracing Engine
+### ⚡ A Lightning-Fast, Multi-node Ray Tracing Engine
 
 **Render photorealistic images across multiple machines with multi-threading, BVH acceleration, and real-time camera control**
 
