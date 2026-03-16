@@ -1,0 +1,10 @@
+minishell
+include/debug.h
+src/debug.c
+suppressions.sub
+.DS_Store
+.vscode
+.DS_Store
+*.o
+*.a
+42_minishell_tester
