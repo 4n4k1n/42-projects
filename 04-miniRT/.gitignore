@@ -1,0 +1,8 @@
+*.o
+*.a
+*.out
+.vscode
+MLX42
+miniRT
+scene.rt
+*.pdf

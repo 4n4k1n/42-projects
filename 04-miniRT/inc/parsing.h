@@ -1,0 +1,84 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parsing.h                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: nweber <nweber@student.42Heilbronn.de>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/11/11 15:34:59 by nweber            #+#    #+#             */
+/*   Updated: 2025/11/15 15:24:53 by nweber           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#ifndef PARSING_H
+# define PARSING_H
+
+# include "objects.h"
+
+typedef struct s_arg_check
+{
+	int	has_a;
+	int	has_c;
+	int	has_l;
+}		t_arg_check;
+
+typedef struct s_mat_ctx
+{
+	int			base_len;
+	int			i;
+	t_rgb		albedo;
+	t_material	**out;
+}	t_mat_ctx;
+
+// Error
+int		rt_error(const char *msg);
+void	free_scene(t_data *scene);
+
+// Parsing
+int		parse_material(char **tokens, int len, t_obj *o);
+int		mat_base_for_obj(t_obj *o, int *base_len,
+			t_rgb *albedo, t_material ***outp);
+int		create_material_from_token(const char *mstr, t_rgb albedo,
+			t_material **out);
+int		create_phong_material(const char *mstr, t_rgb albedo,
+			t_material **out);
+int		create_glass_material(const char *mstr, t_material **out);
+int		parse_scene(const char *path, t_data *scene);
+int		parse_ambient(char **tokens, t_data *scene, t_arg_check *args);
+int		parse_camera(char **tokens, t_data *scene, t_arg_check *args);
+int		parse_light(char **tokens, t_data *scene, t_arg_check *args);
+int		parse_cylinder(char **tokens, t_data *scene);
+int		parse_plane(char **tokens, t_data *scene);
+int		parse_sphere(char **tokens, t_data *scene);
+int		parse_pyramid(char **tokens, t_data *scene);
+int		parse_cone(char **tokens, t_data *scene);
+int		parse_bump(const char *token, t_obj *o);
+int		parse_triangle(char **tokens, t_data *scene);
+
+// Utils
+int		is_rt_file(const char *path);
+int		parse_double(const char *str, double *out);
+int		parse_vec3(const char *str, t_vec3 *out);
+int		parse_rgb(const char *str, t_rgb *out);
+
+// Validators
+int		validate_fov(double fov);
+char	*trim_and_strip(char *s);
+int		vec_in_range(t_vec3 *vec, double min, double max);
+int		in_range_d(double v, double min, double max);
+int		vec_non_zero(t_vec3 v);
+void	free_bump_list(t_obj *cur);
+
+// List
+t_obj	*obj_new(t_obj_type type);
+int		obj_push(t_obj_list *lst, t_obj *node);
+t_light	*light_new(void);
+int		light_push(t_light_list *lst, t_light *node);
+
+/* Debug printer (tester) */
+void	print_scene(const t_data *scene);
+void	print_vec3(const char *name, t_vec3 v);
+void	print_rgb(const char *name, t_rgb c);
+void	print_objects(const t_obj_list *lst);
+
+#endif
