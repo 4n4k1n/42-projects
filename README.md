@@ -217,7 +217,29 @@ Projects were added as subtrees from their original repositories:
 
 ```bash
 # Example of how projects were added
-git subtree add --prefix=00-libft/ <repo-url> main 
+git subtree add --prefix=00-libft/ <repo-url> main
+```
+
+### Extracting Individual Projects
+
+You can extract any project back into its own standalone repository with full commit history using `git subtree split`:
+
+```bash
+# Extract a project into its own branch
+git subtree split --prefix=00-libft/ -b libft-standalone
+
+# Create a new repository from that branch
+mkdir ../libft-extracted
+cd ../libft-extracted
+git init
+git pull ../projects libft-standalone
+
+# Or push directly to a remote repository
+cd ../projects
+git push git@github.com:yourusername/libft.git libft-standalone:main
+```
+
+This preserves the complete commit history for just that project, making it easy to maintain separate repositories while keeping this consolidated portfolio.
 
 ## License
 
