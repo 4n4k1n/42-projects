@@ -1,6 +1,7 @@
 #pragma once
 
 #include "webserv.hpp"
+#include "Connection_class.hpp"
 
 #include <sys/types.h>
 #include <sys/socket.h>    
@@ -14,6 +15,18 @@
 #include <vector>
 #include <poll.h>
 
-// sockets.cpp
+class Connection;
+
+// event_handling.cpp
+Connection create_client_socket(Connection con);
+void handleRequest(Connection con);
+
+// event_loop.cpp
+void event_loop(std::vector<Connection> con);
+
+// socket_creation.cpp
 void setup_sockets(void);
 int create_socket_fds(std::string port);
+
+// utils.cpp
+void print_poll_fds(std::vector<Connection> &poll_fds);

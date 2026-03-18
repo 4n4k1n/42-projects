@@ -1,0 +1,37 @@
+#include "socket/sockets.hpp"
+#include  "socket/Connection_class.hpp"
+
+void event_loop(std::vector<Connection> con){
+	
+	while (true){
+
+		std::vector<struct pollfd> poll_array(con.size());
+        for (size_t i = 0; i < con.size(); i++){
+            poll_array[i] = con[i]._poll_fd;
+        }
+        
+        int ready = poll(poll_array.data(), con.size(), -1);
+        if (ready == -1){
+            std::cerr << RED << "poll error" << RESET << std::endl;
+            break;
+        }
+        for(size_t i = 0; i < con.size(); i++){
+            if(poll_array[i].revents & POLLIN){
+                std::cout << BLUE << "POLLIN" << RESET << std::endl;
+                if(con[i]._fd_flag == SERVER_FD){
+                    std::cout << BLUE << "SERVER_FD route" << RESET << std::endl;
+                        Connection client_socket;
+
+                        client_socket = create_client_socket(con[i]);
+                        client_socket._index = con.size();
+                        con.push_back(client_socket);
+                    } else if(con[i]._fd_flag == CLIENT_FD){
+                    std::cout << BLUE << "CLIENT_FD route" << RESET << std::endl;
+                    handleRequest(con[i]);
+                }
+        
+            }
+        }
+        }
+
+}

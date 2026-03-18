@@ -1,6 +1,7 @@
 #pragma once
 
 #include "sockets.hpp"
+#include <poll.h>
 
 typedef enum FD_CHECK
 {
