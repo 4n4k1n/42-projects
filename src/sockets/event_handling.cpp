@@ -60,10 +60,9 @@ void handle_pollout_request(Connection &con)
 {
     if(con._write_buffer.empty()){
         std::cout << GREEN << "write buffer empty write done" << RESET << std::endl;
-        con._poll_fd.events = POLLIN;
-        con._write_index = 0;
-        con._read_buffer.clear();
-        con._write_buffer.clear();
+        close(con._poll_fd.fd);
+        con._poll_fd.fd = -1;
+        con._poll_fd.events = 0;
         return ;
     }
 
