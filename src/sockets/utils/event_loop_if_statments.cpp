@@ -18,3 +18,11 @@ bool isServerFd(Connection con)
     }
 }
 
+bool isPOLLIN(Connection con)
+{
+    if(con._poll_fd.revents == POLLIN){
+        return (true);
+    } else {
+        return (false);
+    }
+}
