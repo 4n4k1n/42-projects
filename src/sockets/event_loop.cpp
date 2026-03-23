@@ -15,10 +15,14 @@ void event_loop(std::vector<Connection> &con){
             std::cerr << RED << "poll error" << RESET << std::endl;
             break;
         }
+
+        //check revnets for each connection
         for(size_t i = 0; i < con.size(); i++){
-            if(poll_array[i].revents & POLLIN){
+            if(poll_array[i].revents & POLLIN)
+            {
                 std::cout << BLUE << "POLLIN" << RESET << std::endl;
-                if(con[i]._fd_flag == SERVER_FD){
+                if(isServerFd(con[i]))
+                {
                     std::cout << BLUE << "SERVER_FD route" << RESET << std::endl;
                         Connection client_socket;
 

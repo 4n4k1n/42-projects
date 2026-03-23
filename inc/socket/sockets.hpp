@@ -31,3 +31,6 @@ int create_socket_fds(std::string port);
 
 // utils.cpp
 void print_poll_fds(std::vector<Connection> &poll_fds);
+
+// event_loop_if_statments.cpp
+bool isServerFd(Connection con);
