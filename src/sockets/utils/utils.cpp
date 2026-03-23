@@ -8,3 +8,12 @@ void print_poll_fds(std::vector<Connection> &poll_fds)
         std::cout << YELLOW << "FD[" << i << "]: " << poll_fds[i]._poll_fd.fd << RESET << std::endl;
     }
 }
+
+Connection connect_client(Connection &con, size_t index)
+{
+    Connection client_socket;
+    
+    client_socket = create_client_socket(con);
+    client_socket._index = index;
+    return(client_socket);
+}
