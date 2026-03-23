@@ -26,3 +26,12 @@ bool isPOLLIN(Connection con)
         return (false);
     }
 }
+
+bool isPOLLOUT(Connection con)
+{
+    if(con._poll_fd.revents == POLLOUT){
+        return (true);
+    } else {
+        return (false);
+    }
+}
