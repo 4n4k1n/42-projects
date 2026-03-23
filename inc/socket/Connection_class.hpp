@@ -3,6 +3,9 @@
 #include "sockets.hpp"
 #include <poll.h>
 
+
+#define RECV_BUFFER_SIZE 4096
+
 typedef enum FD_CHECK
 {
     SERVER_FD,
