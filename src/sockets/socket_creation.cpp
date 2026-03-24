@@ -1,31 +1,30 @@
 #include "socket/sockets.hpp"
 #include "socket/Connection_class.hpp"
 
- std::vector<Connection> setup_sockets(void)
+std::vector<Connection> setup_sockets(Config config)
 {
-    std::string port("8080");
-    
-    std::vector<Connection> con;
-    int i = 0;
-    while(i < 1){
-        int socket_fd = create_socket_fds(port);
-        if(socket_fd == -1)
-        {
-            std::cout << RED << "socket_fd creation failed" << std::endl;
+    	std::vector<Connection> con;
+	for(size_t i = 0; i < config.servers.size(); i++)
+	{
+		int port = config.servers[i].port;
+		
+      	int socket_fd = create_socket_fds(std::to_string(port));
+      	if(socket_fd == -1)
+      	{
+            	std::cout << RED << "socket_fd creation failed" << std::endl;
 			break;
-        }
+      	}
         
 		Connection fd;
 		fd._poll_fd.fd = socket_fd;
-        fd._poll_fd.events = POLLIN;
-        fd._poll_fd.revents = 0;
-        fd._index = i;
+      	fd._poll_fd.events = POLLIN;
+      	fd._poll_fd.revents = 0;
+      	fd._index = i;
 
-        con.push_back(fd);
-        i++;
-    }
+      	con.push_back(fd);
+    	}
 	print_poll_fds(con);
-    return(con);
+    	return(con);
 }
 
 int create_socket_fds(std::string port)
