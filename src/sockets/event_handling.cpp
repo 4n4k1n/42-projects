@@ -65,9 +65,8 @@ void handle_pollout_request(Connection &con)
 		con._write_buffer.clear();
 		return ;
     } else if (bytes == -1){
-		std::cerr << RED << "recv error: " << strerror(errno) << RESET << std::endl;
+		std::cerr << RED << "send error: " << strerror(errno) << RESET << std::endl;
 		return ;
     }
     con._write_index += bytes;
-    std::cout << CYAN << "Sent " << bytes << " bytes" << RESET << std::endl;
 }

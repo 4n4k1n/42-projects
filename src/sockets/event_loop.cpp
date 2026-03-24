@@ -7,17 +7,17 @@ void event_loop(std::vector<Connection> &con)
 	while (true)
 	{
 		std::vector<struct pollfd> poll_array(con.size());
-		for (size_t i = 0; i < con.size(); i++){
+		for (size_t i = 0; i < con.size(); i++)
 			poll_array[i] = con[i]._poll_fd;
-		}
 
 		int ready = poll(poll_array.data(), con.size(), -1);
-		if (ready == -1){
+		if (ready == -1)
+		{
 			std::cerr << RED << "poll error" << RESET << std::endl;
 			break;
 		}
 
-		//check revnets for each connection
+		//check revents for each connection
 		for(size_t i = 0; i < con.size(); i++)
 		{
 			if(isPOLLIN(poll_array[i]))
