@@ -112,7 +112,6 @@ void ConfigParser::parseServer(std::stringstream& ss, Config& config, std::size_
 	config.servers.push_back(server);
 }
 
-
 void ConfigParser::parseLocation(std::stringstream& ss, ServerConfig& server, const std::string& path, std::size_t& line) {
 	LocationConfig loc;
 	loc.path = path;
@@ -158,6 +157,19 @@ void ConfigParser::parseLocation(std::stringstream& ss, ServerConfig& server, co
 		else {
 			throw std::runtime_error("Line " + std::to_string(line) + ": unknown location directive: " + token);
 		}
+	}
+	std::string effectiveRoot = loc.root;
+	if (effectiveRoot.empty())
+		effectiveRoot = server.root;
+	if (!effectiveRoot.empty() && !isDirectory(effectiveRoot)) {
+		throw std::runtime_error("Line " + std::to_string(line) 
+		+ ": root directory does not exist: " + effectiveRoot);
+	}
+
+	std::string fullPath = jointPaths(effectiveRoot, loc.path);
+	if (!pathExists(fullPath)) {
+		throw std::runtime_error("Line " + std::to_string(line)
+			+ ": location path does not exist: " + fullPath);
 	}
 	server.locations.push_back(loc);
 }
