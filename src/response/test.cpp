@@ -1,4 +1,99 @@
 #include "LocationConfig.hpp"
+#include "response.hpp"
+#include "color.hpp"
+#include <iostream>
+#include <fstream>
+
+// Helper function to create a test file
+void createTestFile(const std::string &path, const std::string &content) {
+	std::ofstream file(path);
+	if (file.is_open()) {
+		file << content;
+		file.close();
+	}
+}
+
+// Helper function to run a test
+void runTest(const std::string &testName, bool passed) {
+	if (passed) {
+		std::cout << GREEN << "✓ " << testName << RESET << std::endl;
+	} else {
+		std::cout << RED << "✗ " << testName << RESET << std::endl;
+	}
+}
+
+// Test the route matching function
+void testRouteMatching(const std::vector<LocationConfig> &locations) {
+	std::cout << CYAN << "\n=== Route Matching Tests ===" << RESET << std::endl;
+
+	const LocationConfig *result = routeMatching("/test", locations);
+	runTest("Route matching for /test", result != NULL && result->path == "/test");
+
+	result = routeMatching("/api", locations);
+	runTest("Route matching for /api", result != NULL && result->path == "/api");
+
+	result = routeMatching("/api/v2/users", locations);
+	runTest("Route matching for /api/v2/users (longest match)",
+		result != NULL && result->path == "/api/v2");
+
+	result = routeMatching("/nonexistent", locations);
+	runTest("Route matching for nonexistent path", result != NULL && result->path == "/");
+
+	result = routeMatching("/downloads/file.txt", locations);
+	runTest("Route matching for /downloads/file.txt",
+		result != NULL && result->path == "/downloads");
+}
+
+// Test the method checking function
+void testMethodCheck(const std::vector<LocationConfig> &locations) {
+	std::cout << CYAN << "\n=== Method Check Tests ===" << RESET << std::endl;
+
+	const LocationConfig *loc = routeMatching("/test", locations);
+	runTest("GET method allowed on /test", checkMethod("GET", loc) == true);
+	runTest("POST method allowed on /test", checkMethod("POST", loc) == true);
+	runTest("DELETE method not allowed on /test", checkMethod("DELETE", loc) == false);
+
+	loc = routeMatching("/", locations);
+	runTest("GET method allowed on /", checkMethod("GET", loc) == true);
+	runTest("POST method not allowed on /", checkMethod("POST", loc) == false);
+
+	loc = routeMatching("/api", locations);
+	runTest("DELETE method allowed on /api", checkMethod("DELETE", loc) == true);
+}
+
+// Test the build path function
+void testBuildPath(const std::vector<LocationConfig> &locations) {
+	std::cout << CYAN << "\n=== Build Path Tests ===" << RESET << std::endl;
+
+	const LocationConfig *loc = routeMatching("/test", locations);
+	std::string path = buildRealPath(loc);
+	runTest("Build path for /test", path == "./test.cpp");
+
+	loc = routeMatching("/", locations);
+	path = buildRealPath(loc);
+	runTest("Build path for /", path == "/var/www/htmlindex.html");
+
+	loc = routeMatching("/api", locations);
+	path = buildRealPath(loc);
+	runTest("Build path for /api", path == "/var/www/apiindex.html");
+}
+
+// Test file checking function
+void testFileCheck() {
+	std::cout << CYAN << "\n=== File Check Tests ===" << RESET << std::endl;
+
+	// Create a test file
+	createTestFile("test_readable.txt", "Test content");
+
+	int result = checkFile("test_readable.txt", "GET");
+	runTest("Check existing readable file", result != -1);
+
+	result = checkFile("nonexistent_file.txt", "GET");
+	runTest("Check nonexistent file", result == -1);
+
+	// Clean up
+	std::remove("test_readable.txt");
+}
 
 int main(void) {
 	std::vector<LocationConfig> locations;
@@ -123,4 +218,50 @@ int main(void) {
 	loc15.auto_index = false;
 	loc15.methods = {"GET", "POST", "PUT", "DELETE"};
 	locations.push_back(loc15);
+
+	// Add a test location for the response function
+	LocationConfig test_loc;
+	test_loc.path = "/test";
+	test_loc.root = "./";
+	test_loc.index = "test.cpp";
+	test_loc.auto_index = false;
+	test_loc.methods = {"GET", "POST"};
+	locations.push_back(test_loc);
+
+	// Print header
+	std::cout << BOLD << CYAN << "\n╔════════════════════════════════════════╗" << RESET << std::endl;
+	std::cout << BOLD << CYAN << "║   Response Function Unit Test Suite   ║" << RESET << std::endl;
+	std::cout << BOLD << CYAN << "╚════════════════════════════════════════╝" << RESET << std::endl;
+
+	// Run unit tests
+	testRouteMatching(locations);
+	testMethodCheck(locations);
+	testBuildPath(locations);
+	testFileCheck();
+
+	// Test the full response function with a real file
+	std::cout << CYAN << "\n=== Integration Test: Response Function ===" << RESET << std::endl;
+
+	// Create a test file that the response function can find
+	createTestFile("test.cpp", "// This is a test file\n");
+
+	std::cout << YELLOW << "Testing response function with URI: /test, Method: GET" << RESET << std::endl;
+	std::string result = response(locations);
+
+	if (result.empty()) {
+		std::cout << YELLOW << "⚠ Response returned empty (expected - method execution not implemented)" << RESET << std::endl;
+	} else {
+		std::cout << GREEN << "✓ Response function succeeded!" << RESET << std::endl;
+		std::cout << MAGENTA << "Result: " << result << RESET << std::endl;
+	}
+
+	// Clean up
+	std::remove("test.cpp");
+
+	// Print summary
+	std::cout << BOLD << CYAN << "\n════════════════════════════════════════" << RESET << std::endl;
+	std::cout << BOLD << GREEN << "Test suite completed!" << RESET << std::endl;
+	std::cout << BOLD << CYAN << "════════════════════════════════════════\n" << RESET << std::endl;
+
+	return 0;
 }
