@@ -54,7 +54,6 @@ int create_socket_fds(std::string port)
         freeaddrinfo(results);
         return (-1);
     }
-    std::cout << GREEN << "Socket created " << socket_fd << RESET << std::endl;
 
     int opt = 1;
     if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
@@ -63,7 +62,6 @@ int create_socket_fds(std::string port)
         freeaddrinfo(results);
         return (-1);
     }
-    std::cout << GREEN << "Socket options set"  << RESET << std::endl;
 
 
     if (fcntl(socket_fd, F_SETFL, O_NONBLOCK) == -1)
@@ -72,7 +70,6 @@ int create_socket_fds(std::string port)
         freeaddrinfo(results);
         return (-1);
     }
-    std::cout << GREEN << "Socket set to non-blocking" << RESET << std::endl;
 
     if (bind(socket_fd, results->ai_addr, results->ai_addrlen) == -1)
     {
@@ -81,7 +78,6 @@ int create_socket_fds(std::string port)
         freeaddrinfo(results);
         return (-1);
     }
-    std::cout << GREEN << "Socket bound to port " << port << RESET << std::endl;
     if (listen(socket_fd, SOMAXCONN) == -1)
     {
         std::cerr << RED << "listen error: " << strerror(errno) << RESET << std::endl;
@@ -89,7 +85,7 @@ int create_socket_fds(std::string port)
         freeaddrinfo(results);
         return (-1);
     }
-    std::cout << GREEN << "Socket listening on port " << port << RESET << std::endl;
+    
     freeaddrinfo(results);
 
     return(socket_fd);
