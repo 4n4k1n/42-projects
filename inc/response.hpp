@@ -24,5 +24,5 @@ struct http_request {
 const LocationConfig	*routeMatching(const std::string *uri, const std::vector<LocationConfig> &locations);
 bool	checkMethod(const std::string &method, const LocationConfig location);
 std::string buildRealPath(const LocationConfig &loc);
-int	checkFile(std::string file_path);
+int	checkFile(std::string file_path, std::string method);
 
