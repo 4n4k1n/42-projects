@@ -13,6 +13,17 @@ class LocationConfig {
         std::string cgiExtensions;
         std::string cgiPath;
 
+        std::string index;
+        bool        auto_index;
+
+
         std::string uploadDir;
         LocationConfig() : cgiEnabled(false) {}
+
+        LocationConfig& operator=(const LocationConfig &other) {
+            if (this != &other) {
+                *this = other;
+            }
+            return *this;
+        }
 };
