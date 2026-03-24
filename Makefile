@@ -20,14 +20,17 @@ vpath %.cpp $(SRC_DIRS)
 ANAKIN_FILES := anakin.cpp
 ANAKIN := $(addprefix anakin_part/, $(ANAKIN_FILES))
 
-SOCKETS_FILES := sockets.cpp
+SOCKETS_FILES := connection_class.cpp event_handling.cpp event_loop.cpp socket_creation.cpp
 SOCKETS := $(addprefix sockets/, $(SOCKETS_FILES))
 
-PARSER_FILES := parse_config.cpp
+SOCKETS_UTILS_FILES := utils.cpp event_loop_if_statments.cpp
+SOCKETS_UTILS := $(addprefix sockets/utils/, $(SOCKETS_UTILS_FILES))
+
+PARSER_FILES := parseConfig.cpp utils.cpp
 PARSER := $(addprefix parsing/, $(PARSER_FILES))
 
 SRC_FILES := main.cpp webserv.cpp
-SRC := $(addprefix src/, $(SRC_FILES) $(PARSER) $(SOCKETS) $(ANAKIN))
+SRC := $(addprefix src/, $(SRC_FILES) $(PARSER) $(SOCKETS) $(SOCKETS_UTILS) $(ANAKIN))
 
 # Test files
 TEST_NAME := test_response
