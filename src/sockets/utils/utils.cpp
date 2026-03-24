@@ -17,3 +17,19 @@ Connection connect_client(Connection &con, size_t index)
     client_socket._index = index;
     return(client_socket);
 }
+
+bool recv_error(ssize_t bytes)
+{
+    if(bytes == 0)
+	{
+		std::cout << YELLOW << "Client disconnected" << RESET << std::endl;
+		return (true);
+	}
+	else if (bytes == -1)
+	{
+		if(errno != EWOULDBLOCK)
+			std::cerr << RED << "recv error: " << strerror(errno) << RESET << std::endl;
+		return (true);
+	}
+    return (false);
+}

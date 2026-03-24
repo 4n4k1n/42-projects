@@ -20,25 +20,25 @@ void event_loop(std::vector<Connection> &con)
 		//check revnets for each connection
 		for(size_t i = 0; i < con.size(); i++)
 		{
-		if(isPOLLIN(poll_array[i]))
+			if(isPOLLIN(poll_array[i]))
+			{
+				std::cout << BLUE << "POLLIN" << RESET << std::endl;
+				if(isServerFd(con[i]))
 				{
-					std::cout << BLUE << "POLLIN" << RESET << std::endl;
-					if(isServerFd(con[i]))
-					{
-							std::cout << BLUE << "SERVER_FD route" << RESET << std::endl;
-							con.push_back(connect_client(con[i], con.size()));
-					}
-					if(isClientFd(con[i]))
-					{
-							std::cout << BLUE << "CLIENT_FD route" << RESET << std::endl;
-							handle_pollin_request(con[i]);
-					}
+					std::cout << BLUE << "SERVER_FD route" << RESET << std::endl;
+					con.push_back(connect_client(con[i], con.size()));
 				}
-				if(isPOLLOUT(poll_array[i]))
+				if(isClientFd(con[i]))
 				{
-					std::cout << BLUE << "POLLOUT route" << RESET << std::endl;
-					handle_pollout_request(con[i]);
+					std::cout << BLUE << "CLIENT_FD route" << RESET << std::endl;
+					handle_pollin_request(con[i]);
 				}
+			}
+			if(isPOLLOUT(poll_array[i]))
+			{
+				std::cout << BLUE << "POLLOUT route" << RESET << std::endl;
+				handle_pollout_request(con[i]);
+			}
 		}
 	}
 

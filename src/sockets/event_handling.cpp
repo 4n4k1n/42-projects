@@ -30,32 +30,25 @@ Connection create_client_socket(Connection con)
 
 void handle_pollin_request(Connection &con)
 {
-    char buffer[RECV_BUFFER_SIZE];
-    ssize_t bytes = recv(con._poll_fd.fd, buffer, sizeof(buffer), 0);
-    if(bytes == 0){
-		std::cout << YELLOW << "Client disconnected" << RESET << std::endl;
+	char buffer[RECV_BUFFER_SIZE];
+	ssize_t bytes = recv(con._poll_fd.fd, buffer, sizeof(buffer), 0);
+	if(recv_error(bytes))
 		return ;
-    } else if (bytes == -1){
-		if(errno != EAGAIN && errno != EWOULDBLOCK){
-			std::cerr << RED << "recv error: " << strerror(errno) << RESET << std::endl;
-		}
-	  return;
-    }
+	buffer[bytes] = '\0';
 
-    buffer[bytes] = '\0';
-    con._read_buffer.append(buffer, bytes);
-    std::cout << BOLD << BLUE << con._read_buffer << RESET << std::endl;
-    if(con._read_buffer.find("\r\n\r\n") != std::string::npos){
+	con._read_buffer.append(buffer, bytes);
+	if(con._read_buffer.find("\r\n\r\n") != std::string::npos)
+	{
 		con._write_buffer = "HTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\nHello";
 		con._poll_fd.events = POLLOUT;
 		return ;
-    }
-    std::cout << CYAN << "Waiting for more data..." << RESET << std::endl;
+	}
 }
 
 void handle_pollout_request(Connection &con)
 {
-    if(con._write_buffer.empty()){
+    if(con._write_buffer.empty())
+    {
 		std::cout << GREEN << "write buffer empty write done" << RESET << std::endl;
 		close(con._poll_fd.fd);
 		con._poll_fd.fd = -1;
