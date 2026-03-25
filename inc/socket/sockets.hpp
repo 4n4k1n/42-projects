@@ -22,6 +22,7 @@ class Connection;
 Connection create_client_socket(Connection con);
 void handle_pollin_request(Connection &con);
 void handle_pollout_request(Connection &con);
+void handle_pollerr_pollhup_request(Connection &con);
 
 // event_loop.cpp
 void event_loop(std::vector<Connection> &con);

@@ -47,31 +47,35 @@ void handle_pollin_request(Connection &con)
 
 void handle_pollout_request(Connection &con)
 {
-    if(con._write_buffer.empty())
-    {
+    	if(con._write_buffer.empty())
+    	{
 		std::cout << GREEN << "write buffer empty write done" << RESET << std::endl;
 		close(con._poll_fd.fd);
 		con._poll_fd.fd = -1;
 		con._poll_fd.events = 0;
 		return ;
-    }
+    	}
 
-    const char *buffer = con._write_buffer.c_str() + con._write_index;
-    size_t remaining = con._write_buffer.length() - con._write_index;
+    	const char *buffer = con._write_buffer.c_str() + con._write_index;
+    	size_t remaining = con._write_buffer.length() - con._write_index;
 
-    ssize_t bytes = send(con._poll_fd.fd, buffer, remaining, 0);
-    if(bytes == 0){
+    	ssize_t bytes = send(con._poll_fd.fd, buffer, remaining, 0);
+    	if(bytes == 0)
+    	{
 		std::cout << YELLOW << "Client disconnected" << RESET << std::endl;
 		con._write_buffer.clear();
 		return ;
-    } else if (bytes == -1){
+    	}
+    	else if (bytes == -1)
+	{
 		std::cerr << RED << "send error: " << strerror(errno) << RESET << std::endl;
 		return ;
-    }
-    con._write_index += bytes;
+    	}
+    	con._write_index += bytes;
 }
 
-// void handle_pollerr_pollhup_request(Connection &con)
-// {
-
-// }
+void handle_pollerr_pollhup_request(Connection &con)
+{
+	std::cout << RED << "POLLERR/POLLHUP route" << RESET << std::endl;
+	close(con._poll_fd.fd);
+}
