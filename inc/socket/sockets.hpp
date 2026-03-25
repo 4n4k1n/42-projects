@@ -1,6 +1,7 @@
 #pragma once
 
 #include "webserv.hpp"
+#include "Config/Config.hpp"
 #include "Connection_class.hpp"
 
 #include <sys/types.h>
@@ -26,7 +27,7 @@ void handle_pollout_request(Connection &con);
 void event_loop(std::vector<Connection> &con);
 
 // socket_creation.cpp
- std::vector<Connection> setup_sockets(void);
+std::vector<Connection> setup_sockets(Config config);
 int create_socket_fds(std::string port);
 
 // utils.cpp
@@ -40,3 +41,4 @@ bool isClientFd(Connection con);
 bool isPOLLIN(struct pollfd poll_array);
 bool isPOLLOUT(struct pollfd poll_array);
 bool isPOLLERR(struct pollfd poll_array);
+bool isPOLLHUP(struct pollfd poll_array);
