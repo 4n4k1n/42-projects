@@ -11,7 +11,7 @@ std::string response(const http_request &request, const std::vector<LocationConf
 		return "";
 	}
 
-	std::string file_path(buildRealPath(loc));
+	std::string file_path(buildRealPath(loc, request.path));
 
 	if (request.method == "GET" || request.method == "DELETE") {
 		if (checkFile(file_path, request.method) == -1) {
