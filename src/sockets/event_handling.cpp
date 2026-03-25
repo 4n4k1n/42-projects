@@ -51,12 +51,7 @@ void handle_pollin_request(Connection &con)
 	con._read_buffer.append(buffer, bytes);
 	if(con._read_buffer.find("\r\n\r\n") != std::string::npos)
 	{
-		int status = 404;
-		std::ostringstream response;
-
-		response << "HTTP/1.1 " << status << " " << status_message(status) << "\r\nContent-Length: 5\r\n\r\nHello";
-		std::cout << response.str() << std::endl; 
-		con._write_buffer = response.str();
+		
 		con._poll_fd.events = POLLOUT;
 		return ;
 	}

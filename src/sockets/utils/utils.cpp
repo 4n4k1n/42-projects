@@ -44,23 +44,3 @@ void close_connection(Connection &con)
 	con._write_buffer.clear();
 	con._write_index = 0;
 }
-std::string status_message(int status)
-{
-	switch (status)
-	{
-		case(200):
-			return ("OK");
-		case(400):
-			return ("Bad Request");
-		case(403):
-			return ("Forbidden");
-		case(404):
-			return ("Not Found");
-		case(405):
-			return ("Method Not Allowed");
-		case(500):
-			return ("Internal Server Error");
-		default:
-			return ("Error");
-	}
-}
