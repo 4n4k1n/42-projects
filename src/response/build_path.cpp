@@ -1,10 +1,7 @@
 #include "response.hpp"
-#include "LocationConfig.hpp"
+#include "Config/LocationConfig.hpp"
 
 std::string buildRealPath(const LocationConfig *loc) {
-	std::stringstream ss;
-
-	ss << loc->root << loc->index;
-
-	return ss.str();
+	// TODO: Add logic for index files, auto-index, etc.
+	return loc->root;
 }
