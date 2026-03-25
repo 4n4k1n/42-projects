@@ -1,7 +1,7 @@
 #include "response.hpp"
 #include "Config/LocationConfig.hpp"
 #include "color.hpp"
-#include "GET.hpp"
+#include "methods.hpp"
 
 std::string response(const http_request &request, const std::vector<LocationConfig> &locations) {
 	const LocationConfig *loc = routeMatching(request.path, locations);
