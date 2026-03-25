@@ -33,3 +33,15 @@ bool recv_error(ssize_t bytes)
 	}
     return (false);
 }
+
+void close_connection(Connection &con)
+{
+    if(con._poll_fd.fd != -1)
+        close(con._poll_fd.fd);
+    con._poll_fd.fd = -1;
+    con._poll_fd.events = 0;
+    con._poll_fd.revents = 0;
+    con._read_buffer.clear();
+    con._write_buffer.clear();
+    con._write_index = 0;
+}

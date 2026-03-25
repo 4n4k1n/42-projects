@@ -77,5 +77,5 @@ void handle_pollout_request(Connection &con)
 void handle_pollerr_pollhup_request(Connection &con)
 {
 	std::cout << RED << "POLLERR/POLLHUP route" << RESET << std::endl;
-	close(con._poll_fd.fd);
+	close_connection(con);
 }
