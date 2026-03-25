@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <vector>
 #include "response.hpp"
-#include "LocationConfig.hpp"
+#include "Config/LocationConfig.hpp"
 
 const LocationConfig	*routeMatching(
 	const std::string &uri, const std::vector<LocationConfig> &locations) {
