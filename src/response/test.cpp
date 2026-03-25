@@ -1,274 +1,344 @@
-#include "Config/LocationConfig.hpp"
 #include "response.hpp"
-#include "color.hpp"
+#include "methods.hpp"
 #include <iostream>
 #include <fstream>
+#include <cassert>
+#include <filesystem>
+#include <vector>
 
-// Helper function to create a test file
-void createTestFile(const std::string &path, const std::string &content) {
-	std::ofstream file(path);
-	if (file.is_open()) {
-		file << content;
-		file.close();
-	}
-}
+// ANSI color codes for test output
+#define TEST_GREEN "\033[32m"
+#define TEST_RED "\033[31m"
+#define TEST_BLUE "\033[34m"
+#define TEST_RESET "\033[0m"
 
-// Helper function to run a test
-void runTest(const std::string &testName, bool passed) {
+// Test counter
+static int g_tests_passed = 0;
+static int g_tests_failed = 0;
+
+// Helper: Print test result
+void print_test_result(const std::string &test_name, bool passed) {
 	if (passed) {
-		std::cout << GREEN << "✓ " << testName << RESET << std::endl;
+		std::cout << TEST_GREEN << "[PASS] " << TEST_RESET << test_name << std::endl;
+		g_tests_passed++;
 	} else {
-		std::cout << RED << "✗ " << testName << RESET << std::endl;
+		std::cout << TEST_RED << "[FAIL] " << TEST_RESET << test_name << std::endl;
+		g_tests_failed++;
 	}
 }
 
-// Test the route matching function
-void testRouteMatching(const std::vector<LocationConfig> &locations) {
-	std::cout << CYAN << "\n=== Route Matching Tests ===" << RESET << std::endl;
-
-	const LocationConfig *result = routeMatching("/test", locations);
-	runTest("Route matching for /test", result != NULL && result->path == "/test");
-
-	result = routeMatching("/api", locations);
-	runTest("Route matching for /api", result != NULL && result->path == "/api");
-
-	result = routeMatching("/api/v2/users", locations);
-	runTest("Route matching for /api/v2/users (longest match)",
-		result != NULL && result->path == "/api/v2");
-
-	result = routeMatching("/nonexistent", locations);
-	runTest("Route matching for nonexistent path", result != NULL && result->path == "/");
-
-	result = routeMatching("/downloads/file.txt", locations);
-	runTest("Route matching for /downloads/file.txt",
-		result != NULL && result->path == "/downloads");
+// Helper: Create a test file with content
+void create_test_file(const std::string &path, const std::string &content) {
+	std::ofstream file(path);
+	file << content;
+	file.close();
 }
 
-// Test the method checking function
-void testMethodCheck(const std::vector<LocationConfig> &locations) {
-	std::cout << CYAN << "\n=== Method Check Tests ===" << RESET << std::endl;
-
-	const LocationConfig *loc = routeMatching("/test", locations);
-	runTest("GET method allowed on /test", checkMethod("GET", loc) == true);
-	runTest("POST method allowed on /test", checkMethod("POST", loc) == true);
-	runTest("DELETE method not allowed on /test", checkMethod("DELETE", loc) == false);
-
-	loc = routeMatching("/", locations);
-	runTest("GET method allowed on /", checkMethod("GET", loc) == true);
-	runTest("POST method not allowed on /", checkMethod("POST", loc) == false);
-
-	loc = routeMatching("/api", locations);
-	runTest("DELETE method allowed on /api", checkMethod("DELETE", loc) == true);
-}
-
-// Test the build path function
-void testBuildPath(const std::vector<LocationConfig> &locations) {
-	std::cout << CYAN << "\n=== Build Path Tests ===" << RESET << std::endl;
-
-	const LocationConfig *loc = routeMatching("/test", locations);
-	std::string path = buildRealPath(loc);
-	runTest("Build path for /test", path == "./");
-
-	loc = routeMatching("/", locations);
-	path = buildRealPath(loc);
-	runTest("Build path for /", path == "/var/www/html");
-
-	loc = routeMatching("/api", locations);
-	path = buildRealPath(loc);
-	runTest("Build path for /api", path == "/var/www/api");
-}
-
-// Test file checking function
-void testFileCheck() {
-	std::cout << CYAN << "\n=== File Check Tests ===" << RESET << std::endl;
-
-	// Create a test file
-	createTestFile("test_readable.txt", "Test content");
-
-	int result = checkFile("test_readable.txt", "GET");
-	runTest("Check existing readable file", result != -1);
-
-	result = checkFile("nonexistent_file.txt", "GET");
-	runTest("Check nonexistent file", result == -1);
-
-	// Clean up
-	std::remove("test_readable.txt");
-}
-
-int main(void) {
-	std::vector<LocationConfig> locations;
-
-	LocationConfig loc1;
-	loc1.path = "/";
-	loc1.root = "/var/www/html";
-	loc1.methods = {"GET"};
-	locations.push_back(loc1);
-
-	LocationConfig loc2;
-	loc2.path = "/api";
-	loc2.root = "/var/www/api";
-	loc2.methods = {"GET", "POST", "DELETE"};
-	locations.push_back(loc2);
-
-	LocationConfig loc3;
-	loc3.path = "/uploads";
-	loc3.root = "/var/www/uploads";
-	loc3.methods = {"GET", "POST"};
-	locations.push_back(loc3);
-
-	LocationConfig loc4;
-	loc4.path = "/images";
-	loc4.root = "/var/www/static/images";
-	loc4.methods = {"GET"};
-	locations.push_back(loc4);
-
-	LocationConfig loc5;
-	loc5.path = "/admin";
-	loc5.root = "/var/www/admin";
-	loc5.methods = {"GET", "POST", "PUT", "DELETE"};
-	locations.push_back(loc5);
-
-	LocationConfig loc6;
-	loc6.path = "/blog";
-	loc6.root = "/var/www/blog";
-	loc6.methods = {"GET"};
-	locations.push_back(loc6);
-
-	LocationConfig loc7;
-	loc7.path = "/docs";
-	loc7.root = "/var/www/documentation";
-	loc7.methods = {"GET"};
-	locations.push_back(loc7);
-
-	LocationConfig loc8;
-	loc8.path = "/assets/css";
-	loc8.root = "/var/www/static/css";
-	loc8.methods = {"GET"};
-	locations.push_back(loc8);
-
-	LocationConfig loc9;
-	loc9.path = "/assets/js";
-	loc9.root = "/var/www/static/js";
-	loc9.methods = {"GET"};
-	locations.push_back(loc9);
-
-	LocationConfig loc10;
-	loc10.path = "/downloads";
-	loc10.root = "/var/www/files";
-	loc10.methods = {"GET", "POST"};
-	locations.push_back(loc10);
-
-	LocationConfig loc11;
-	loc11.path = "/cgi-bin";
-	loc11.root = "/usr/lib/cgi-bin";
-	loc11.cgiEnabled = true;
-	loc11.methods = {"GET", "POST"};
-	locations.push_back(loc11);
-
-	LocationConfig loc12;
-	loc12.path = "/redirect";
-	loc12.root = "/var/www/html";
-	loc12.methods = {"GET"};
-	locations.push_back(loc12);
-
-	LocationConfig loc13;
-	loc13.path = "/videos";
-	loc13.root = "/var/www/media/videos";
-	loc13.methods = {"GET"};
-	locations.push_back(loc13);
-
-	LocationConfig loc14;
-	loc14.path = "/forum";
-	loc14.root = "/var/www/forum";
-	loc14.methods = {"GET", "POST", "PUT"};
-	locations.push_back(loc14);
-
-	LocationConfig loc15;
-	loc15.path = "/api/v2";
-	loc15.root = "/var/www/api/v2";
-	loc15.methods = {"GET", "POST", "PUT", "DELETE"};
-	locations.push_back(loc15);
-
-	// Add a test location for the response function
-	LocationConfig test_loc;
-	test_loc.path = "/test";
-	test_loc.root = "./";
-	test_loc.methods = {"GET", "POST"};
-	locations.push_back(test_loc);
-
-	// Print header
-	std::cout << BOLD << CYAN << "\n╔════════════════════════════════════════╗" << RESET << std::endl;
-	std::cout << BOLD << CYAN << "║   Response Function Unit Test Suite   ║" << RESET << std::endl;
-	std::cout << BOLD << CYAN << "╚════════════════════════════════════════╝" << RESET << std::endl;
-
-	// Run unit tests
-	testRouteMatching(locations);
-	testMethodCheck(locations);
-	testBuildPath(locations);
-	testFileCheck();
-
-	// Test the full response function with a real file
-	std::cout << CYAN << "\n=== Integration Test: Response Function ===" << RESET << std::endl;
-
-	// Create a test file that the response function can find
-	createTestFile("test.cpp", "// This is a test file\n");
-
-	// Create a test HTTP request
-	http_request request;
-	request.method = "GET";
-	request.path = "/test";
-	request.http_version = "HTTP/1.1";
-	request.headers["Host"] = "localhost";
-
-	std::cout << YELLOW << "Testing response function with URI: " << request.path
-		<< ", Method: " << request.method << RESET << std::endl;
-	std::string result = response(request, locations);
-
-	if (result.empty()) {
-		std::cout << YELLOW << "⚠ Response returned empty (expected - method execution not implemented)" << RESET << std::endl;
-	} else {
-		std::cout << GREEN << "✓ Response function succeeded!" << RESET << std::endl;
-		std::cout << MAGENTA << "Result: " << result << RESET << std::endl;
+// Helper: Remove test file if it exists
+void cleanup_test_file(const std::string &path) {
+	if (std::filesystem::exists(path)) {
+		std::filesystem::remove(path);
 	}
+}
 
-	// Test with POST method
-	request.method = "POST";
-	request.body = "test data";
-	std::cout << YELLOW << "\nTesting response function with URI: " << request.path
-		<< ", Method: " << request.method << RESET << std::endl;
-	result = response(request, locations);
-	if (result.empty()) {
-		std::cout << YELLOW << "⚠ Response returned empty (expected - method execution not implemented)" << RESET << std::endl;
-	} else {
-		std::cout << GREEN << "✓ Response function succeeded!" << RESET << std::endl;
-	}
+// Helper: Create a LocationConfig for testing
+LocationConfig create_test_location(const std::string &path, const std::string &root,
+									const std::vector<std::string> &methods) {
+	LocationConfig loc;
+	loc.path = path;
+	loc.root = root;
+	loc.methods = methods;
+	loc.cgiEnabled = false;
+	return loc;
+}
 
-	// Test with disallowed method
-	request.method = "DELETE";
-	request.path = "/test";
-	std::cout << YELLOW << "\nTesting response function with URI: " << request.path
-		<< ", Method: " << request.method << " (should fail)" << RESET << std::endl;
-	result = response(request, locations);
-	if (result.empty()) {
-		std::cout << GREEN << "✓ Correctly rejected disallowed method" << RESET << std::endl;
-	} else {
-		std::cout << RED << "✗ Should have rejected DELETE method" << RESET << std::endl;
-	}
+// Helper: Create an http_request for testing
+http_request create_test_request(const std::string &method, const std::string &path,
+								 const std::string &body = "") {
+	http_request req;
+	req.method = method;
+	req.path = path;
+	req.http_version = "HTTP/1.1";
+	req.body = body;
+	return req;
+}
 
-	// Test with different path
-	request.method = "GET";
-	request.path = "/api";
-	std::cout << YELLOW << "\nTesting response function with URI: " << request.path
-		<< ", Method: " << request.method << RESET << std::endl;
-	result = response(request, locations);
+// ============================================================================
+// TEST CASES
+// ============================================================================
 
-	// Clean up
-	std::remove("test.cpp");
+// Test 1: GET method - successful file read
+void test_get_success() {
+	const std::string test_file = "/tmp/webserv_test_get.txt";
+	const std::string test_content = "Hello, World!";
+
+	// Setup
+	create_test_file(test_file, test_content);
+
+	std::vector<std::string> allowed_methods = {"GET", "POST", "DELETE"};
+	LocationConfig loc = create_test_location("/", "/tmp/", allowed_methods);
+	std::vector<LocationConfig> locations = {loc};
+
+	http_request req = create_test_request("GET", "/webserv_test_get.txt");
+
+	// Execute
+	std::string result = response(req, locations);
+
+	// Verify
+	bool passed = !result.empty() && result.find(test_content) != std::string::npos;
+	print_test_result("GET - successful file read", passed);
+
+	// Cleanup
+	cleanup_test_file(test_file);
+}
+
+// Test 2: GET method - file not found
+void test_get_file_not_found() {
+	const std::string test_file = "/tmp/webserv_test_nonexistent.txt";
+
+	// Ensure file doesn't exist
+	cleanup_test_file(test_file);
+
+	std::vector<std::string> allowed_methods = {"GET", "POST", "DELETE"};
+	LocationConfig loc = create_test_location("/", "/tmp/", allowed_methods);
+	std::vector<LocationConfig> locations = {loc};
+
+	http_request req = create_test_request("GET", "/webserv_test_nonexistent.txt");
+
+	// Execute
+	std::string result = response(req, locations);
+
+	// Verify - should return empty string on error
+	bool passed = result.empty();
+	print_test_result("GET - file not found returns empty", passed);
+}
+
+// Test 3: POST method - create new file
+void test_post_create_new_file() {
+	const std::string test_file = "/tmp/webserv_test_post_new.txt";
+	const std::string test_content = "New file content";
+
+	// Setup - ensure file doesn't exist
+	cleanup_test_file(test_file);
+
+	std::vector<std::string> allowed_methods = {"GET", "POST", "DELETE"};
+	LocationConfig loc = create_test_location("/", "/tmp/", allowed_methods);
+	std::vector<LocationConfig> locations = {loc};
+
+	http_request req = create_test_request("POST", "/webserv_test_post_new.txt", test_content);
+
+	// Execute
+	std::string result = response(req, locations);
+
+	// Verify - should return 201 Created for new file
+	bool passed = result.find("201") != std::string::npos &&
+				  result.find("Created") != std::string::npos;
+	print_test_result("POST - create new file returns 201", passed);
+
+	// Cleanup
+	cleanup_test_file(test_file);
+}
+
+// Test 4: POST method - append to existing file
+void test_post_append_existing_file() {
+	const std::string test_file = "/tmp/webserv_test_post_existing.txt";
+	const std::string initial_content = "Initial content\n";
+	const std::string new_content = "Appended content";
+
+	// Setup - create existing file
+	create_test_file(test_file, initial_content);
+
+	std::vector<std::string> allowed_methods = {"GET", "POST", "DELETE"};
+	LocationConfig loc = create_test_location("/", "/tmp/", allowed_methods);
+	std::vector<LocationConfig> locations = {loc};
+
+	http_request req = create_test_request("POST", "/webserv_test_post_existing.txt", new_content);
+
+	// Execute
+	std::string result = response(req, locations);
+
+	// Verify - should return 200 OK for existing file
+	bool passed = result.find("200") != std::string::npos &&
+				  result.find("OK") != std::string::npos;
+	print_test_result("POST - append to existing file returns 200", passed);
+
+	// Cleanup
+	cleanup_test_file(test_file);
+}
+
+// Test 5: DELETE method - successful deletion
+void test_delete_success() {
+	const std::string test_file = "/tmp/webserv_test_delete.txt";
+
+	// Setup - create file to delete
+	create_test_file(test_file, "To be deleted");
+
+	std::vector<std::string> allowed_methods = {"GET", "POST", "DELETE"};
+	LocationConfig loc = create_test_location("/", "/tmp/", allowed_methods);
+	std::vector<LocationConfig> locations = {loc};
+
+	http_request req = create_test_request("DELETE", "/webserv_test_delete.txt");
+
+	// Execute
+	std::string result = response(req, locations);
+
+	// Verify - should return 204 No Content
+	bool status_ok = result.find("204") != std::string::npos &&
+					 result.find("No Content") != std::string::npos;
+	bool file_deleted = !std::filesystem::exists(test_file);
+	bool passed = status_ok && file_deleted;
+
+	print_test_result("DELETE - successful deletion returns 204", passed);
+
+	// Cleanup (if test failed)
+	cleanup_test_file(test_file);
+}
+
+// Test 6: DELETE method - file not found
+void test_delete_file_not_found() {
+	const std::string test_file = "/tmp/webserv_test_delete_nonexistent.txt";
+
+	// Setup - ensure file doesn't exist
+	cleanup_test_file(test_file);
+
+	std::vector<std::string> allowed_methods = {"GET", "POST", "DELETE"};
+	LocationConfig loc = create_test_location("/", "/tmp/", allowed_methods);
+	std::vector<LocationConfig> locations = {loc};
+
+	http_request req = create_test_request("DELETE", "/webserv_test_delete_nonexistent.txt");
+
+	// Execute
+	std::string result = response(req, locations);
+
+	// Verify - should return empty (file check fails before DELETE is called)
+	bool passed = result.empty();
+	print_test_result("DELETE - file not found returns empty", passed);
+}
+
+// Test 7: Method not allowed
+void test_method_not_allowed() {
+	std::vector<std::string> allowed_methods = {"GET"};  // Only GET allowed
+	LocationConfig loc = create_test_location("/", "/tmp/", allowed_methods);
+	std::vector<LocationConfig> locations = {loc};
+
+	http_request req = create_test_request("POST", "/test.txt", "content");
+
+	// Execute
+	std::string result = response(req, locations);
+
+	// Verify - should return empty string when method not allowed
+	bool passed = result.empty();
+	print_test_result("Method not allowed returns empty", passed);
+}
+
+// Test 8: Multiple locations - correct route matching
+void test_multiple_locations() {
+	const std::string test_file = "/tmp/api/webserv_test_api.txt";
+	const std::string test_content = "API response";
+
+	// Setup - create directory and file
+	std::filesystem::create_directories("/tmp/api");
+	create_test_file(test_file, test_content);
+
+	std::vector<std::string> methods1 = {"GET"};
+	std::vector<std::string> methods2 = {"GET", "POST"};
+
+	LocationConfig loc1 = create_test_location("/", "/tmp/", methods1);
+	LocationConfig loc2 = create_test_location("/api/", "/tmp/api/", methods2);
+	std::vector<LocationConfig> locations = {loc1, loc2};
+
+	http_request req = create_test_request("GET", "/api/webserv_test_api.txt");
+
+	// Execute
+	std::string result = response(req, locations);
+
+	// Verify - should successfully read file from /api/ location
+	bool passed = !result.empty() && result.find(test_content) != std::string::npos;
+	print_test_result("Multiple locations - correct route matching", passed);
+
+	// Cleanup
+	cleanup_test_file(test_file);
+	std::filesystem::remove("/tmp/api");
+}
+
+// Test 9: GET with empty file
+void test_get_empty_file() {
+	const std::string test_file = "/tmp/webserv_test_empty.txt";
+
+	// Setup - create empty file
+	create_test_file(test_file, "");
+
+	std::vector<std::string> allowed_methods = {"GET"};
+	LocationConfig loc = create_test_location("/", "/tmp/", allowed_methods);
+	std::vector<LocationConfig> locations = {loc};
+
+	http_request req = create_test_request("GET", "/webserv_test_empty.txt");
+
+	// Execute
+	std::string result = response(req, locations);
+
+	// Verify - GET returns file content, so empty file returns empty string
+	// This is expected behavior - the HTTP headers are added elsewhere
+	bool passed = result.empty();
+	print_test_result("GET - empty file returns empty content", passed);
+
+	// Cleanup
+	cleanup_test_file(test_file);
+}
+
+// Test 10: POST with empty body
+void test_post_empty_body() {
+	const std::string test_file = "/tmp/webserv_test_post_empty.txt";
+
+	// Setup - ensure file doesn't exist
+	cleanup_test_file(test_file);
+
+	std::vector<std::string> allowed_methods = {"POST"};
+	LocationConfig loc = create_test_location("/", "/tmp/", allowed_methods);
+	std::vector<LocationConfig> locations = {loc};
+
+	http_request req = create_test_request("POST", "/webserv_test_post_empty.txt", "");
+
+	// Execute
+	std::string result = response(req, locations);
+
+	// Verify - should return 201 Created
+	bool passed = result.find("201") != std::string::npos;
+	print_test_result("POST - empty body creates file with 201", passed);
+
+	// Cleanup
+	cleanup_test_file(test_file);
+}
+
+// ============================================================================
+// MAIN TEST RUNNER
+// ============================================================================
+
+int main() {
+	std::cout << TEST_BLUE << "========================================" << TEST_RESET << std::endl;
+	std::cout << TEST_BLUE << "  Running response() Unit Tests" << TEST_RESET << std::endl;
+	std::cout << TEST_BLUE << "========================================" << TEST_RESET << std::endl << std::endl;
+
+	// Run all tests
+	test_get_success();
+	test_get_file_not_found();
+	test_post_create_new_file();
+	test_post_append_existing_file();
+	test_delete_success();
+	test_delete_file_not_found();
+	test_method_not_allowed();
+	test_multiple_locations();
+	test_get_empty_file();
+	test_post_empty_body();
 
 	// Print summary
-	std::cout << BOLD << CYAN << "\n════════════════════════════════════════" << RESET << std::endl;
-	std::cout << BOLD << GREEN << "Test suite completed!" << RESET << std::endl;
-	std::cout << BOLD << CYAN << "════════════════════════════════════════\n" << RESET << std::endl;
+	std::cout << std::endl;
+	std::cout << TEST_BLUE << "========================================" << TEST_RESET << std::endl;
+	std::cout << TEST_BLUE << "  Test Summary" << TEST_RESET << std::endl;
+	std::cout << TEST_BLUE << "========================================" << TEST_RESET << std::endl;
+	std::cout << TEST_GREEN << "Passed: " << g_tests_passed << TEST_RESET << std::endl;
+	std::cout << TEST_RED << "Failed: " << g_tests_failed << TEST_RESET << std::endl;
+	std::cout << "Total:  " << (g_tests_passed + g_tests_failed) << std::endl;
 
-	return 0;
+	return g_tests_failed == 0 ? 0 : 1;
 }
