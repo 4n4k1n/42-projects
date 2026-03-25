@@ -20,7 +20,7 @@ Connection connect_client(Connection &con, size_t index)
 
 bool recv_error(ssize_t bytes)
 {
-    if(bytes == 0)
+    	if(bytes == 0)
 	{
 		std::cout << YELLOW << "Client disconnected" << RESET << std::endl;
 		return (true);
@@ -30,17 +30,37 @@ bool recv_error(ssize_t bytes)
 		std::cerr << RED << "recv error" << RESET << std::endl;
 		return (true);
 	}
-    return (false);
+    	return (false);
 }
 
 void close_connection(Connection &con)
 {
-    if(con._poll_fd.fd != -1)
-        close(con._poll_fd.fd);
-    con._poll_fd.fd = -1;
-    con._poll_fd.events = 0;
-    con._poll_fd.revents = 0;
-    con._read_buffer.clear();
-    con._write_buffer.clear();
-    con._write_index = 0;
+	if(con._poll_fd.fd != -1)
+		close(con._poll_fd.fd);
+	con._poll_fd.fd = -1;
+	con._poll_fd.events = 0;
+	con._poll_fd.revents = 0;
+	con._read_buffer.clear();
+	con._write_buffer.clear();
+	con._write_index = 0;
+}
+std::string status_message(int status)
+{
+	switch (status)
+	{
+		case(200):
+			return ("OK");
+		case(400):
+			return ("Bad Request");
+		case(403):
+			return ("Forbidden");
+		case(404):
+			return ("Not Found");
+		case(405):
+			return ("Method Not Found");
+		case(500):
+			return ("Internal Server Error");
+		default:
+			return ("Error");
+	}
 }
