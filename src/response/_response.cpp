@@ -18,11 +18,6 @@ std::string response(const http_request &request, const std::vector<LocationConf
 	if (request.method == "GET" || request.method == "DELETE") {
 		status = checkFile(file_path, request.method);
 		if (status != 200) {
-			if (status == 404)
-				return errorResponse(404);
-			else if (status == 403)
-				return errorResponse(403);
-			else
 				return errorResponse(status);
 		}
 	}
