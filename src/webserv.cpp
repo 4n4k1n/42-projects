@@ -89,13 +89,24 @@
 
 void webServ(char *filename) 
 {
-	    Config config;
+	Config config;
     ConfigParser parser;
 
     config = parser.parse(filename);
-    printConfig(config);
+    // printConfig(config);
     std::vector<Connection> con;
-    con = setup_sockets();
+    con = setup_sockets(config);
     event_loop(con);
 
+	std::string reqBody =
+	"POST /submit HTTP/1.1\r\n"
+	"Host: localhost:8080\r\n"
+	"Content-Type: application/x-www-form-urlencoded\r\n"
+	"Content-Length: 23\r\n"
+	"\r\n"
+	"username=daniel&age=23";
+	HttpRequest req;
+
+	req = req.parseRequest(reqBody);
+	// req.print();
 }
