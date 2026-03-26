@@ -28,4 +28,3 @@ std::string	errorResponse(const int error_code) {
 
 	return response.build();
 }
-
