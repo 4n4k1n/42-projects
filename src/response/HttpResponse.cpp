@@ -42,7 +42,7 @@ void HttpResponse::setStandardHeader(void) {
 		headers["Server"] = "Webserv/1.0";
 	if (headers.find("Connection") == headers.end())
 		headers["Connection"] = "close";
-	if (!body.empty() && headers.find("Content-Length") == headers.end())
+	if (headers.find("Content-Length") == headers.end())
 		headers["Content-Length"] = std::to_string(body.size());
 }
 
