@@ -1,6 +1,7 @@
-#include "response.hpp"
+#include "HttpResponse.hpp"
 #include "color.hpp"
 #include <iostream>
+#include "status.hpp"
 
 std::string	errorResponse(const int error_code) {
 	std::ostringstream ss;

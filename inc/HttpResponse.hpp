@@ -15,7 +15,7 @@ class HttpResponse {
 		HttpResponse() = default;
 		HttpResponse(const int status);
 		HttpResponse(const HttpResponse &other);
-		HttpResponse operator=(const HttpResponse &other);
+		HttpResponse &operator=(const HttpResponse &other);
 		~HttpResponse() = default;
 
 		void setHeader(const std::string &key, const std::string &value);

@@ -2,7 +2,7 @@
 #include <sstream>
 #include <unistd.h>
 #include <vector>
-#include "response.hpp"
+#include "HttpResponse.hpp"
 #include "Config/LocationConfig.hpp"
 
 const LocationConfig	*routeMatching(
