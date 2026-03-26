@@ -1,4 +1,4 @@
-#include "response.hpp"
+#include "HttpResponse.hpp"
 #include <filesystem>
 
 int	checkFile(std::string file_path, std::string method) {

@@ -1,4 +1,4 @@
-#include "response.hpp"
+#include "HttpResponse.hpp"
 #include "Config/LocationConfig.hpp"
 
 bool	checkMethod(const std::string &method, const LocationConfig *location) {

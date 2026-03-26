@@ -1,4 +1,4 @@
-#include "response.hpp"
+#include "HttpResponse.hpp"
 #include "Config/LocationConfig.hpp"
 
 std::string buildRealPath(const LocationConfig *loc, const std::string &request_path) {

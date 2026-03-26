@@ -1,7 +1,7 @@
 #pragma once
 
-#include "webserv.hpp"
-#include "Config/Config.hpp"
+#include <string>
+#include <map>
 
 class HttpRequest {
 	public:

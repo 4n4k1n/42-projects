@@ -1,4 +1,7 @@
 #include "Config/HttpRequest.hpp"
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
 
 HttpRequest HttpRequest::parseRequest(const std::string& reqBody) {
 	if (reqBody.empty())
