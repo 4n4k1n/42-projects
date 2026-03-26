@@ -6,6 +6,23 @@
 #include <map>
 #include "Config/LocationConfig.hpp"
 
+class HttpResponse {
+	public:
+		int status = 200;
+		std::map<std::string, std::string> headers;
+		std::string body;
+
+		HttpResponse() = default;
+		HttpResponse(const int status);
+		HttpResponse(const HttpResponse &other);
+		HttpResponse operator=(const HttpResponse &other);
+		~HttpResponse() = default;
+
+		void setHeader(const std::string &key, const std::string &value);
+		void setStandardHeader(void);
+		std::string build(void);
+};
+
 struct http_request {
 	std::string 						method;			// GET, POST, DELETE, etc.
 	std::string 						path;			// /api/users
