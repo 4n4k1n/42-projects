@@ -2,10 +2,15 @@
 
 #include <string>
 #include <map>
+#include <sstream>
+#include <iostream>
+#include <algorithm>
+#include <cstdlib>
+#include "../Colors.hpp"
 
 class HttpRequest {
 	public:
-	enum Methods {GET, POST, DELETE, UNKOWN = -1};
+	enum Methods {GET, POST, DELETE, UNKNOWN = -1};
 
 	Methods		method;
 	std::string target;
@@ -20,7 +25,8 @@ class HttpRequest {
 	size_t contentLength;
 	bool keepAlive;
 
-
-	HttpRequest parseRequest(const std::string& req);
-	private:
+	void parseReqline(HttpRequest& req, const std::string& rawReq);
+	void parseHeaders(HttpRequest& req, const std::string& rawReq);
+	HttpRequest parseRequest(const std::string& rawReq);
+	void print() const;
 };
