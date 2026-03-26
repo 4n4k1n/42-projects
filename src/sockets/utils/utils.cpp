@@ -6,7 +6,9 @@ void print_poll_fds(std::vector<Connection> &poll_fds)
     std::cout << YELLOW << "Poll list size: " << poll_fds.size() << RESET << std::endl;
     for (size_t i = 0; i < poll_fds.size(); i++){
         std::cout << YELLOW << "FD[" << i << "]: " << poll_fds[i]._poll_fd.fd << RESET << std::endl;
-    }
+	  std::cout << MAGENTA << "PORT: " << poll_fds[i]._serverConfig.port << RESET << std::endl;
+
+	}
 }
 
 Connection connect_client(Connection &con, size_t index)
