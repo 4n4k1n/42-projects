@@ -40,16 +40,15 @@ Connection create_client_socket(Connection con)
 
 void handle_pollin_request(Connection &con)
 {
-	char buffer[RECV_BUFFER_SIZE + 1];
+	char buffer[RECV_BUFFER_SIZE];
 	ssize_t bytes = recv(con._poll_fd.fd, buffer, sizeof(buffer), 0);
 	if(recv_error(bytes))
 	{
 		close_connection(con);
 		return ;
 	}
-	buffer[bytes] = '\0';
 
-	con._read_buffer.append(buffer, bytes);
+	con._read_buffer.append(buffer, static_cast<size_t>(bytes));
 	if(con._read_buffer.find("\r\n\r\n") != std::string::npos)
 	{
 		con._fullReq = con._fullReq.parseRequest(con._read_buffer);

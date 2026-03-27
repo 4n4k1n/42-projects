@@ -6,7 +6,9 @@ void print_poll_fds(std::vector<Connection> &poll_fds)
     std::cout << YELLOW << "Poll list size: " << poll_fds.size() << RESET << std::endl;
     for (size_t i = 0; i < poll_fds.size(); i++){
         std::cout << YELLOW << "FD[" << i << "]: " << poll_fds[i]._poll_fd.fd << RESET << std::endl;
-    }
+	  std::cout << MAGENTA << "PORT: " << poll_fds[i]._serverConfig.port << RESET << std::endl;
+
+	}
 }
 
 Connection connect_client(Connection &con, size_t index)
@@ -43,4 +45,17 @@ void close_connection(Connection &con)
 	con._read_buffer.clear();
 	con._write_buffer.clear();
 	con._write_index = 0;
+}
+
+bool is_closed_connection(Connection &c)
+{
+	if (c._poll_fd.fd == -1){
+		return (true);
+	}
+	return (false);
+}
+
+void remove_closed_connection(std::vector<Connection> &con)
+{
+	con.erase(std::remove_if(con.begin(), con.end(),is_closed_connection), con.end());
 }

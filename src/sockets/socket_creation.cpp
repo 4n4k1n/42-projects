@@ -20,6 +20,7 @@ std::vector<Connection> setup_sockets(Config config)
       	fd._poll_fd.events = POLLIN;
       	fd._poll_fd.revents = 0;
       	fd._index = i;
+		fd._serverConfig = config.servers[i];
 
       	con.push_back(fd);
     	}
