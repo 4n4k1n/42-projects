@@ -104,7 +104,10 @@ std::string response(const HttpRequest &request, const std::vector<LocationConfi
 
 	if (request.method == GET) {
 		HttpResponse response(200);
-		response.setHeader("Content-Type", getContentType(file_path));
+		if (is_dir)
+			response.setHeader("Content-Type", "text/html");
+		else
+			response.setHeader("Content-Type", getContentType(file_path));
 		response.body = get_method(file_path, is_dir);
 		return response.build();
 	}
@@ -125,32 +128,3 @@ std::string response(const HttpRequest &request, const std::vector<LocationConfi
 
 	return errorResponse(500);
 }
-
-// std::string mock_response(void) {
-// 	// Create mock location configuration
-// 	LocationConfig loc;
-// 	loc.path = "/";
-// 	loc.root = "/tmp/webserv_mock";
-// 	loc.methods.push_back(GET);
-// 	loc.methods.push_back(POST);
-// 	loc.methods.push_back(DELETE);
-// 	loc.cgiEnabled = false;
-// 	loc.index = "index.html";
-// 	loc.auto_index = true;
-
-// 	std::vector<LocationConfig> locations;
-// 	locations.push_back(loc);
-
-// 	// Create mock HTTP request
-// 	http_request request;
-// 	request.method = "GET";
-// 	request.path = "/";
-// 	request.http_version = "HTTP/1.1";
-// 	request.headers["Host"] = "localhost:8080";
-// 	request.headers["User-Agent"] = "MockClient/1.0";
-// 	request.headers["Accept"] = "text/html";
-// 	request.body = "";
-
-// 	// Call the real response function with mock data
-// 	return response(request, locations);
-// }
