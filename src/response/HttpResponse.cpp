@@ -1,4 +1,5 @@
 #include "HttpResponse.hpp"
+#include "HttpRequest.hpp"
 #include "status.hpp"
 #include "Config/LocationConfig.hpp"
 #include "color.hpp"
@@ -65,7 +66,7 @@ std::string HttpResponse::build(void) {
 	return ss.str();
 }
 
-std::string response(const http_request &request, const std::vector<LocationConfig> &locations) {
+std::string response(const HttpRequest &request, const std::vector<LocationConfig> &locations) {
 	const LocationConfig *loc = routeMatching(request.path, locations);
 	int status = 200;
 	std::stringstream ss;
@@ -74,30 +75,31 @@ std::string response(const http_request &request, const std::vector<LocationConf
 		return errorResponse(405);
 	}
 
-	std::string file_path(buildRealPath(loc, request.path));
+	bool is_dir = false;
+	std::string file_path(buildRealPath(loc, request.path, is_dir));
 
-	if (request.method == "GET" || request.method == "DELETE") {
+	if (request.method == GET || request.method == DELETE) {
 		status = checkFile(file_path, request.method);
 		if (status != 200) {
 				return errorResponse(status);
 		}
 	}
 
-	if (request.method == "GET") {
+	if (request.method == GET) {
 		HttpResponse response(200);
 		response.setHeader("Content-Type", getContentType(file_path));
-		response.body = GET(file_path);
+		response.body = get_method(file_path, is_dir);
 		return response.build();
 	}
-	else if (request.method == "POST") {
-		status = POST(file_path, request.body);
+	else if (request.method == POST) {
+		status = post_method(file_path, request.body);
 		HttpResponse response(status);
 		response.setHeader("Content-Type", "application/json");
 		response.body = "{\"status\": \"success\"}";
 		return response.build();
 	}
-	else if (request.method == "DELETE") {
-		status = DELETE(file_path);
+	else if (request.method == DELETE) {
+		status = delete_method(file_path);
 		HttpResponse response(status);
 		response.setHeader("Content-Type", "application/json");
 		response.body = "{\"status\": \"deleted\"}";
@@ -111,11 +113,13 @@ std::string mock_response(void) {
 	// Create mock location configuration
 	LocationConfig loc;
 	loc.path = "/";
-	loc.root = "/tmp/webserv_mock/";
-	loc.methods.push_back("GET");
-	loc.methods.push_back("POST");
-	loc.methods.push_back("DELETE");
+	loc.root = "/tmp/webserv_mock";
+	loc.methods.push_back(GET);
+	loc.methods.push_back(POST);
+	loc.methods.push_back(DELETE);
 	loc.cgiEnabled = false;
+	loc.index = "index.html";
+	loc.auto_index = true;
 
 	std::vector<LocationConfig> locations;
 	locations.push_back(loc);
@@ -123,7 +127,7 @@ std::string mock_response(void) {
 	// Create mock HTTP request
 	http_request request;
 	request.method = "GET";
-	request.path = "/datadjsajdh";
+	request.path = "/";
 	request.http_version = "HTTP/1.1";
 	request.headers["Host"] = "localhost:8080";
 	request.headers["User-Agent"] = "MockClient/1.0";

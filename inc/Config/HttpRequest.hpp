@@ -3,9 +3,15 @@
 #include <string>
 #include <map>
 
+typedef enum {
+	GET,
+	POST,
+	DELETE,
+	UNKOWN = -1
+} Methods;
+
 class HttpRequest {
 	public:
-	enum Methods {GET, POST, DELETE, UNKOWN = -1};
 
 	Methods		method;
 	std::string target;
