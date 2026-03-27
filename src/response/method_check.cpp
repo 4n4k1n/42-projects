@@ -1,7 +1,8 @@
 #include "HttpResponse.hpp"
+#include "HttpRequest.hpp"
 #include "Config/LocationConfig.hpp"
 
-bool	checkMethod(const std::string &method, const LocationConfig *location) {
+bool	checkMethod(const Methods method, const LocationConfig *location) {
 	for (const auto& s: location->methods) {
 		if (s == method)
 			return true;
