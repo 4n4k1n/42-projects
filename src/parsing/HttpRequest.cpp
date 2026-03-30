@@ -11,20 +11,20 @@ void HttpRequest::parseReqline(HttpRequest& req, const std::string& rawReq) {
 
 	if (!(ss >> methodStr >> targetStr >> versionStr))
 		throw std::runtime_error("Invalid request line");
-	req.method = (methodStr == "GET") ? GET
+	req._method = (methodStr == "GET") ? GET
 				: (methodStr == "POST") ? POST
 				: (methodStr == "DELETE") ? DELETE
 				: UNKOWN;
-	req.target = targetStr;
-	req.version = versionStr;
+	req._target = targetStr;
+	req._version = versionStr;
 
-	size_t pos = req.target.find('?');
+	size_t pos = req._target.find('?');
 	if (pos != std::string::npos) {
-		req.path = req.target.substr(0, pos);
-		req.query = req.target.substr(pos + 1);
+		req._path = req._target.substr(0, pos);
+		req._query = req._target.substr(pos + 1);
 	} else {
-		req.path = req.target;
-		req.query = "";
+		req._path = req._target;
+		req._query = "";
 	}
 }
 
@@ -50,14 +50,14 @@ void HttpRequest::parseHeaders(HttpRequest& req, const std::string& rawReq) {
 		while (!value.empty() && value[0] == ' ')
 			value.erase(0, 1);
 		std::transform(key.begin(), key.end(), key.begin(), ::tolower);
-		req.headers[key] = value;
-		if (req.headers.count("content-length"))
-			req.contentLength = std::atoi(req.headers["content-length"].c_str());
+		req._headers[key] = value;
+		if (req._headers.count("content-length"))
+			req._contentLength = std::atoi(req._headers["content-length"].c_str());
 		else
-			req.contentLength = 0;
-		if (bodyPart.size() < req.contentLength)
+			req._contentLength = 0;
+		if (bodyPart.size() < req._contentLength)
 			return;
-		req.body = bodyPart; //.substr(0, req.contentLength);
+		req._body = bodyPart; //.substr(0, req.contentLength);
 	}
 }
 
@@ -91,14 +91,14 @@ Methods HttpRequest::stringToMethod(const std::string& methodStr) {
 }
 
 void HttpRequest::print() const {
-	std::cout << "\nMethod: " << methodToString(method) << std::endl;
-	std::cout << "Target: " << target << std::endl;
-	std::cout << "Path: " << path << std::endl;
-	std::cout << "Query: " << query << std::endl;
-	std::cout << "Version: " << version << std::endl;
+	std::cout << "\nMethod: " << methodToString(_method) << std::endl;
+	std::cout << "Target: " << _target << std::endl;
+	std::cout << "Path: " << _path << std::endl;
+	std::cout << "Query: " << _query << std::endl;
+	std::cout << "Version: " << _version << std::endl;
 	std::cout << "Headers:" << std::endl;
-	for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
+	for (std::map<std::string, std::string>::const_iterator it = _headers.begin(); it != _headers.end(); ++it)
 		std::cout << "  " << it->first << ": " << it->second << std::endl;
-	std::cout << "Body: " << body << std::endl;
-	std::cout << "Content-Length: " << contentLength << "\n" << std::endl;
+	std::cout << "Body: " << _body << std::endl;
+	std::cout << "Content-Length: " << _contentLength << "\n" << std::endl;
 }

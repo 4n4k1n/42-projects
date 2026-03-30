@@ -84,25 +84,25 @@ std::string HttpResponse::build(void) {
 std::string response(const HttpRequest &request, const std::vector<LocationConfig> &locations) {
 	request.print();
 
-	const LocationConfig *loc = routeMatching(request.path, locations);
+	const LocationConfig *loc = routeMatching(request._path, locations);
 	int status = 200;
 	std::stringstream ss;
 
-	if (checkMethod(request.method, loc) == false) {
+	if (checkMethod(request._method, loc) == false) {
 		return errorResponse(405);
 	}
 
 	bool is_dir = false;
-	std::string file_path(buildRealPath(loc, request.path, is_dir));
+	std::string file_path(buildRealPath(loc, request._path, is_dir));
 
-	if (request.method == GET || request.method == DELETE) {
-		status = checkFile(file_path, request.method);
+	if (request._method == GET || request._method == DELETE) {
+		status = checkFile(file_path, request._method);
 		if (status != 200) {
 				return errorResponse(status);
 		}
 	}
 
-	if (request.method == GET) {
+	if (request._method == GET) {
 		HttpResponse response(200);
 		if (is_dir)
 			response.setHeader("Content-Type", "text/html");
@@ -111,14 +111,14 @@ std::string response(const HttpRequest &request, const std::vector<LocationConfi
 		response.body = get_method(file_path, is_dir);
 		return response.build();
 	}
-	else if (request.method == POST) {
-		status = post_method(file_path, request.body);
+	else if (request._method == POST) {
+		status = post_method(file_path, request._body);
 		HttpResponse response(status);
 		response.setHeader("Content-Type", "application/json");
 		response.body = "{\"status\": \"success\"}";
 		return response.build();
 	}
-	else if (request.method == DELETE) {
+	else if (request._method == DELETE) {
 		status = delete_method(file_path);
 		HttpResponse response(status);
 		response.setHeader("Content-Type", "application/json");
