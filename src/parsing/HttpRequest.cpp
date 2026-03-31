@@ -96,7 +96,7 @@ HttpRequest HttpRequest::parseRequest(const std::string& rawReq) {
 	HttpRequest req;
 	parseReqline(req, rawReq);
 	parseHeaders(req, rawReq);
-	_body = body;
+	parseBody(req, rawReq);
 	return req;
 }
 
