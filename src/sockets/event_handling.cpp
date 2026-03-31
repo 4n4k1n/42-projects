@@ -1,5 +1,5 @@
-#include "socket/sockets.hpp"
 #include "socket/Connection_class.hpp"
+#include "socket/sockets.hpp"
 #include "HttpResponse.hpp"
 
 Connection create_client_socket(Connection con)
@@ -41,6 +41,7 @@ Connection create_client_socket(Connection con)
 
 void handle_pollin_request(Connection &con)
 {
+	bool isChuncked = true;
 	char buffer[RECV_BUFFER_SIZE];
 	ssize_t bytes = recv(con._poll_fd.fd, buffer, sizeof(buffer), 0);
 	if(recv_error(bytes))
@@ -56,6 +57,10 @@ void handle_pollin_request(Connection &con)
 		std::string headers = con._read_buffer.substr(0, delimiter_pos + 4);
 
 		con._fullReq = con._fullReq.parseRequest(headers);
+		if(con._fullReq._method == POST && isChuncked == true)
+		{
+			build_chunked_body(con);
+		}
 		if(con._fullReq._method == POST)
 		{
 			std::string body = con._read_buffer.substr(delimiter_pos + 4);
@@ -67,6 +72,7 @@ void handle_pollin_request(Connection &con)
 			}
 			con._fullReq._body = body;
 		}
+		
 		con._write_buffer = response(con._fullReq, con._serverConfig.locations);
 		con._poll_fd.events = POLLOUT;
 	}
