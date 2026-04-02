@@ -85,7 +85,7 @@ void HttpRequest::parseBody(HttpRequest& req, const std::string& rawReq) {
 	if (req._headers.count("transfer-encoding") && req._headers["transfer-encoding"] == "chunked")
 		parseChunked(req, body);
 	else if (req._headers.count("content-length")) {
-		req._contentLength = std::atoi(req._headers["content-length"].c_str());
+		req._contentLength = std::strtol(req._headers["content-length"].c_str(), NULL, 10);
 		req._body = body.substr(0, req._contentLength);
 	}
 }
