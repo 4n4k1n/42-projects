@@ -47,6 +47,10 @@ int	processCgi(HttpRequest &request, const std::string &script_path, HttpRespons
 		}
 		env_ptr.push_back(nullptr);
 
+		std::string script_dir = script_path.substr(0, script_path.find_last_of('/'));
+		if (chdir(script_dir.c_str()) == -1)
+			exit(1);
+
 		const char *argv[] = {script_path.c_str(), nullptr};
 		execve(script_path.c_str(), (char* const*)argv, env_ptr.data());
 		exit(1);
