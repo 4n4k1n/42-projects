@@ -218,6 +218,21 @@ void ConfigParser::parseLocation(std::stringstream& ss, ServerConfig& server, co
 			requireSingleTrailingSemicolon(token, line, "client_max_body_size");
 			loc.clientMaxBodySize = parseBodySize(stripSemicolon(token), line);
 		}
+		else if (token == "return") {
+			token = nextToken(ss, line);
+			requireSingleTrailingSemicolon(token, line, "return");
+			loc.returnCode = std::stoi(stripSemicolon(token));
+		}
+		else if (token == "redirect_code") {
+			token = nextToken(ss, line);
+			requireSingleTrailingSemicolon(token, line, "redirect_code");
+			loc.redirectCode = std::stoi(stripSemicolon(token));
+		}
+		else if (token == "redirect_target") {
+			token = nextToken(ss, line);
+			requireSingleTrailingSemicolon(token, line, "redirect_target");
+			loc.redirectTarget = stripSemicolon(token);
+		}
 		else {
 			throw std::runtime_error("Line " + std::to_string(line) + ": unknown location directive: " + token);
 		}
