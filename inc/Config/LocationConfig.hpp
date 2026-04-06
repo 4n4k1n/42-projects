@@ -17,7 +17,8 @@ class LocationConfig {
 
 		std::string	index;
 		bool		auto_index;
+		size_t		clientMaxBodySize;
 
 		std::string uploadDir;
-		LocationConfig() : cgiEnabled(false) {}
+		LocationConfig() : cgiEnabled(false), auto_index(false), clientMaxBodySize(1000000) {}
 };
