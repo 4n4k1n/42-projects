@@ -1,5 +1,6 @@
 #include "Config/ConfigParser.hpp"
 #include <iostream>
+#include <string>
 
 static std::size_t countTrailingSemicolons(const std::string& token) {
 	if (token.empty())
@@ -32,6 +33,32 @@ static std::string nextToken(std::stringstream& ss, std::size_t& line) {
 	std::string token;
 	ss >> token;
 	return token;
+}
+
+static size_t parseBodySize(const std::string& sizeStr, std::size_t line) {
+	if (sizeStr.empty())
+		throw std::runtime_error("Line " + std::to_string(line) + ": client_max_body_size cannot be empty");
+	try {
+		char lastChar = sizeStr.back();
+		size_t multiplier = 1;
+		std::string numStr = sizeStr;
+		if (lastChar == 'k' || lastChar == 'K') {
+			multiplier = 1024;
+			numStr.pop_back();
+		} else if (lastChar == 'm' || lastChar == 'M') {
+			multiplier = 1024 * 1024;
+			numStr.pop_back();
+		} else if (lastChar == 'g' || lastChar == 'G') {
+			multiplier = 1024 * 1024 * 1024;
+			numStr.pop_back();
+		}
+		size_t size = std::stoul(numStr);
+		return size * multiplier;
+	} catch (const std::invalid_argument& e) {
+		throw std::runtime_error("Line " + std::to_string(line) + ": client_max_body_size must be a number with optional suffix (k/m/g), got: " + sizeStr);
+	} catch (const std::out_of_range& e) {
+		throw std::runtime_error("Line " + std::to_string(line) + ": client_max_body_size value too large: " + sizeStr);
+	}
 }
 
 Config ConfigParser::parse(const std::string& filename) {
@@ -92,6 +119,23 @@ void ConfigParser::parseServer(std::stringstream& ss, Config& config, std::size_
 			requireSingleTrailingSemicolon(token, line, "index");
 			server.index = stripSemicolon(token);
 		}
+		else if (token == "auto_index") {
+			token = nextToken(ss, line);
+			requireSingleTrailingSemicolon(token, line, "auto_index");
+			std::string value = stripSemicolon(token);
+			if (value == "true") {
+				server.auto_index = true;
+			} else if (value == "false") {
+				server.auto_index = false;
+			} else {
+				throw std::runtime_error("Line " + std::to_string(line) + ": auto_index must be 'on' or 'off', got: " + value);
+			}
+		}
+		else if (token == "client_max_body_size") {
+			token = nextToken(ss, line);
+			requireSingleTrailingSemicolon(token, line, "client_max_body_size");
+			server.clientMaxBodySize = parseBodySize(stripSemicolon(token), line);
+		}
 		else if (token == "location") {
 			std::string path = nextToken(ss, line);
 			std::size_t locationLine = line;
@@ -151,6 +195,43 @@ void ConfigParser::parseLocation(std::stringstream& ss, ServerConfig& server, co
 			requireSingleTrailingSemicolon(token, line, "cgi_path");
 			loc.cgiPath = stripSemicolon(token);
 			loc.cgiEnabled = true;
+		}
+		else if (token == "index") {
+			token = nextToken(ss, line);
+			requireSingleTrailingSemicolon(token, line, "index");
+			loc.index = stripSemicolon(token);
+		}
+		else if (token == "auto_index") {
+		token = nextToken(ss, line);
+		requireSingleTrailingSemicolon(token, line, "auto_index");
+		std::string value = stripSemicolon(token);
+		if (value == "true") {
+			loc.auto_index = true;
+		} else if (value == "false") {
+			loc.auto_index = false;
+		} else {
+			throw std::runtime_error("Line " + std::to_string(line) + ": auto_index must be 'on' or 'off', got: " + value);
+		}
+		}
+		else if (token == "client_max_body_size") {
+			token = nextToken(ss, line);
+			requireSingleTrailingSemicolon(token, line, "client_max_body_size");
+			loc.clientMaxBodySize = parseBodySize(stripSemicolon(token), line);
+		}
+		else if (token == "return") {
+			token = nextToken(ss, line);
+			requireSingleTrailingSemicolon(token, line, "return");
+			loc.returnCode = std::stoi(stripSemicolon(token));
+		}
+		else if (token == "redirect_code") {
+			token = nextToken(ss, line);
+			requireSingleTrailingSemicolon(token, line, "redirect_code");
+			loc.redirectCode = std::stoi(stripSemicolon(token));
+		}
+		else if (token == "redirect_target") {
+			token = nextToken(ss, line);
+			requireSingleTrailingSemicolon(token, line, "redirect_target");
+			loc.redirectTarget = stripSemicolon(token);
 		}
 		else {
 			throw std::runtime_error("Line " + std::to_string(line) + ": unknown location directive: " + token);
