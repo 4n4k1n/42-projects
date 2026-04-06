@@ -92,6 +92,13 @@ std::string response(const HttpRequest &request, const std::vector<LocationConfi
 	int status = 200;
 	std::stringstream ss;
 
+	// comment out when values are parsed
+	// if (loc.redir_code > 0) {
+	// 	HttpResponse response(loc.redir_code);
+	// 	response.setHeader("Location", loc.redir_target);
+	// 	return response.build();
+	// }
+
 	if (checkMethod(request._method, loc) == false) {
 		return errorResponse(405);
 	}
