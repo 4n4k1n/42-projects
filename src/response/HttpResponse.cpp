@@ -142,7 +142,7 @@ std::string response(const HttpRequest &request, const std::vector<LocationConfi
 		return response.build();
 	}
 	else if (request._method == POST) {
-		if (client_max_body_size > request._body.size())
+		if (client_max_body_size < request._body.size())
 			return errorResponse(413);
 
 		if (!loc->uploadDir.empty()) {
