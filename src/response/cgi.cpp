@@ -6,7 +6,7 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 
-int	processCgi(HttpRequest &request, const std::string &script_path, HttpResponse &response) {
+int	processCgi(HttpRequest &request, const std::string &script_path, const std::string &cgi_path, HttpResponse &response) {
 	int	stdout_fds[2];
 	int	stdin_fds[2];
 
@@ -64,8 +64,8 @@ int	processCgi(HttpRequest &request, const std::string &script_path, HttpRespons
 		if (chdir(script_dir.c_str()) == -1)
 			exit(1);
 
-		const char *argv[] = {script_path.c_str(), nullptr};
-		execve(script_path.c_str(), (char* const*)argv, env_ptr.data());
+		const char *argv[] = {cgi_path.c_str(), script_path.c_str(), nullptr};
+		execve(cgi_path.c_str(), (char* const*)argv, env_ptr.data());
 		exit(1);
 	}
 

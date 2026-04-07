@@ -113,7 +113,7 @@ std::string response(const HttpRequest &request, const std::vector<LocationConfi
 			if (extension == loc->cgiExtensions) {
 				HttpResponse cgi_response(200);
 				HttpRequest &mutable_request = const_cast<HttpRequest&>(request);
-				status = processCgi(mutable_request, file_path, cgi_response);
+				status = processCgi(mutable_request, file_path, loc->cgiPath, cgi_response);
 
 				if (status == 200) {
 					cgi_response.status = status;
