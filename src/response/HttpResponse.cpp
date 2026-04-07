@@ -89,6 +89,9 @@ std::string response(const HttpRequest &request, const std::vector<LocationConfi
 	int status = 200;
 	std::stringstream ss;
 
+	if (loc == NULL)
+		return errorResponse(404);
+
 	if (loc->redirectCode > 0) {
 		HttpResponse response(loc->redirectCode);
 		response.setHeader("Location", loc->redirectTarget);
