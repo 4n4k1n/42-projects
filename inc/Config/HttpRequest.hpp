@@ -32,6 +32,8 @@ class HttpRequest {
 	size_t _contentLength;
 	bool _keepAlive;
 
+	HttpRequest() : _method(UNKNOWN), _isChunked(false), _contentLength(0), _keepAlive(false) {}
+
 	void parseReqline(HttpRequest& req, const std::string& rawReq);
 	void parseHeaders(HttpRequest& req, const std::string& rawReq);
 	void parseBody(HttpRequest& req, const std::string& rawReq);
