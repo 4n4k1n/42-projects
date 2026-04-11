@@ -1,13 +1,17 @@
 #include "Config/HttpRequest.hpp"
 #include "HttpResponse.hpp"
+#include "socket/Connection_class.hpp"
 #include <vector>
 #include <string>
 #include <sstream>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include <ctime>
 
-int	processCgi(HttpRequest &request, const std::string &script_path, const std::string &cgi_path, HttpResponse &response) {
+// Start CGI process in non-blocking mode
+// Returns: 0 if CGI started successfully, error code otherwise
+int	processCgi(HttpRequest &request, const std::string &script_path, const std::string &cgi_path, Connection &conn) {
 	int	stdout_fds[2];
 	int	stdin_fds[2];
 
@@ -26,6 +30,7 @@ int	processCgi(HttpRequest &request, const std::string &script_path, const std::
 	}
 
 	if (pid == 0) {
+		// Child process - execute CGI script
 		close(stdout_fds[0]);
 		dup2(stdout_fds[1], STDOUT_FILENO);
 		dup2(stdout_fds[1], STDERR_FILENO);
@@ -71,42 +76,47 @@ int	processCgi(HttpRequest &request, const std::string &script_path, const std::
 		exit(1);
 	}
 
+	// Parent process - set up non-blocking I/O
 	close(stdout_fds[1]);
 	close(stdin_fds[0]);
 
-	// Write POST body to child's stdin
-	if (!request._body.empty()) {
-		write(stdin_fds[1], request._body.c_str(), request._body.size());
-	}
-	close(stdin_fds[1]);
+	// Set pipes to non-blocking mode
+	int flags = fcntl(stdout_fds[0], F_GETFL, 0);
+	fcntl(stdout_fds[0], F_SETFL, flags | O_NONBLOCK);
 
-	std::string output;
-	char	buf[1024];
-	ssize_t	bytes;
-	while ((bytes = read(stdout_fds[0], buf, sizeof(buf))) > 0)
-		output += std::string(buf, bytes);
-	close(stdout_fds[0]);
+	flags = fcntl(stdin_fds[1], F_GETFL, 0);
+	fcntl(stdin_fds[1], F_SETFL, flags | O_NONBLOCK);
 
-	int status;
-	waitpid(pid, &status, 0);
+	// Store CGI state in connection
+	conn._cgi_state = CGI_RUNNING;
+	conn._cgi_pid = pid;
+	conn._cgi_stdout_fd = stdout_fds[0];
+	conn._cgi_stdin_fd = stdin_fds[1];
+	conn._cgi_stdin_written = 0;
+	conn._cgi_start_time = time(NULL);
+	conn._cgi_output.clear();
+	conn._cgi_script_path = script_path;
+	conn._cgi_path = cgi_path;
 
-	if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
+	return 0;  // Success - CGI is now running
+}
+
+// Finalize CGI after all output has been read
+// Parses CGI headers and body, populates response
+// Returns: HTTP status code
+int finalizeCgi(Connection &conn, HttpResponse &response) {
+	if (conn._cgi_output.empty())
 		return 500;
-
-	if (output.empty())
-		return 500;
-
 
 	// Split CGI output into headers and body at the blank line
-	size_t sep_pos = output.find("\r\n\r\n");
+	size_t sep_pos = conn._cgi_output.find("\r\n\r\n");
 	if (sep_pos == std::string::npos)
-		sep_pos = output.find("\n\n");
+		sep_pos = conn._cgi_output.find("\n\n");
 	if (sep_pos == std::string::npos)
 		return 500;
 
-
-	std::string cgi_headers = output.substr(0, sep_pos);
-	response.body = output.substr(sep_pos + 4);
+	std::string cgi_headers = conn._cgi_output.substr(0, sep_pos);
+	response.body = conn._cgi_output.substr(sep_pos + 4);
 
 	// Parse CGI headers line by line
 	std::istringstream header_stream(cgi_headers);
