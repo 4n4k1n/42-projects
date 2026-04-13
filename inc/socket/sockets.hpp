@@ -27,6 +27,11 @@ void handle_pollin_request(Connection &con);
 void handle_pollout_request(Connection &con);
 void handle_pollerr_pollhup_request(Connection &con);
 
+// cgi_event_handling.cpp
+void handle_cgi_stdout(Connection &con);
+void handle_cgi_stdin(Connection &con);
+void check_cgi_timeout(Connection &con);
+
 // event_loop.cpp
 void event_loop(std::vector<Connection> &con);
 

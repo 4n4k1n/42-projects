@@ -72,15 +72,19 @@ struct http_request {
 	std::string 						body;			// Request body content
 };
 
+// Forward declaration for Connection class
+class Connection;
+
 const LocationConfig	*routeMatching(const std::string &uri, const std::vector<LocationConfig> &locations);
 bool	checkMethod(const Methods method, const LocationConfig *location);
 std::string buildRealPath(const LocationConfig *loc, const std::string &request_path, bool &is_dir);
 int	checkFile(std::string file_path, Methods method);
-std::string response(const HttpRequest &request, const std::vector<LocationConfig> &locations);
+std::string response(const HttpRequest &request, const std::vector<LocationConfig> &locations, Connection &conn);
 
 std::string	errorResponse(const int error_code);
 std::string getContentType(const std::string &file_path);
 
-int processCgi(HttpRequest &request, const std::string &script_path, const std::string &cgi_path, HttpResponse &response);
+int processCgi(HttpRequest &request, const std::string &script_path, const std::string &cgi_path, Connection &conn);
+int finalizeCgi(Connection &conn, HttpResponse &response);
 
 // std::string mock_response(void);
