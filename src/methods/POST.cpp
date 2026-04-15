@@ -15,6 +15,10 @@ int	post_method(const std::string &file_path, const std::string &content) {
 		return 403;
 	}
 
+	std::filesystem::path dir = std::filesystem::path(file_path).parent_path();
+	if (!dir.empty() && !std::filesystem::exists(dir))
+		std::filesystem::create_directories(dir);
+
 	std::ofstream file(file_path, std::ios::app);
 
 	if (!file.is_open()) {
