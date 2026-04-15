@@ -74,6 +74,7 @@ struct http_request {
 
 // Forward declaration for Connection class
 class Connection;
+extern Connection *globalTempConn;
 
 const LocationConfig	*routeMatching(const std::string &uri, const std::vector<LocationConfig> &locations);
 bool	checkMethod(const Methods method, const LocationConfig *location);

@@ -1,6 +1,8 @@
 #include "HttpResponse.hpp"
+#include "socket/Connection_class.hpp"
 #include "color.hpp"
 #include <iostream>
+#include <fstream>
 #include "status.hpp"
 
 std::string	errorResponse(const int error_code) {
@@ -24,7 +26,27 @@ std::string	errorResponse(const int error_code) {
 			<< "</body>\n"
 			<< "</html>";
 
-	response.body = body_ss.str();
+	bool customPageLoaded = false;
+
+	if (globalTempConn && !globalTempConn->_serverConfig.errorPages.empty())
+	{
+		std::map<int, std::string>::const_iterator it = globalTempConn->_serverConfig.errorPages.find(error_code);
+		if (it != globalTempConn->_serverConfig.errorPages.end())
+		{
+			std::ifstream file(it->second.c_str());
+			if (file.is_open())
+			{
+				std::ostringstream custom_body;
+				custom_body << file.rdbuf();
+				response.body = custom_body.str();
+				file.close();
+				customPageLoaded = true;
+			}
+		}
+	}
+
+	if (!customPageLoaded)
+		response.body = body_ss.str();
 
 	std::cerr << RED << "Error: " << error_message << RESET << std::endl;
 

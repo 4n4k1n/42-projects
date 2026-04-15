@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include "HttpRequest.hpp"
 
 class LocationConfig {
@@ -22,6 +23,8 @@ class LocationConfig {
 		int			returnCode;
 		int			redirectCode;
 		std::string	redirectTarget;
+
+		std::map<int, std::string> errorPages;
 
 		std::string uploadDir;
 		LocationConfig() : cgiEnabled(false), auto_index(false), clientMaxBodySize(1000000), returnCode(0), redirectCode(0) {}

@@ -7,6 +7,8 @@
 #include <sstream>
 #include <chrono>
 
+Connection *globalTempConn = NULL;
+
 std::string getContentType(const std::string &file_path) {
 	size_t dot_pos = file_path.find_last_of('.');
 	if (dot_pos == std::string::npos)
@@ -84,6 +86,7 @@ std::string HttpResponse::build(void) {
 
 std::string response(const HttpRequest &request, const std::vector<LocationConfig> &locations, Connection &conn) {
 	request.print();
+	globalTempConn = &conn;
 
 	const LocationConfig *loc = routeMatching(request._path, locations);
 	int status = 200;
