@@ -18,7 +18,7 @@ class LocationConfig {
 
 		std::string	index;
 		bool		auto_index;
-		size_t		clientMaxBodySize;
+		long int		clientMaxBodySize;
 
 		int			returnCode;
 		int			redirectCode;
@@ -27,5 +27,5 @@ class LocationConfig {
 		std::map<int, std::string> errorPages;
 
 		std::string uploadDir;
-		LocationConfig() : cgiEnabled(false), auto_index(false), clientMaxBodySize(1000000), returnCode(0), redirectCode(0) {}
+		LocationConfig() : cgiEnabled(false), auto_index(false), clientMaxBodySize(-1), returnCode(0), redirectCode(0) {}
 };

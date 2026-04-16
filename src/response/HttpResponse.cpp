@@ -146,7 +146,7 @@ std::string response(const HttpRequest &request, const std::vector<LocationConfi
 		return response.build();
 	}
 	else if (request._method == POST) {
-		if (loc->clientMaxBodySize < request._body.size())
+		if (loc->clientMaxBodySize != -1 && loc->clientMaxBodySize < (long int)request._body.size())
 			return errorResponse(413, "Request body too large: " + std::to_string(request._body.size()) + " bytes");
 
 		if (!loc->uploadDir.empty()) {
