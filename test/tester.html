@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Webserv Tester</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: monospace; background: #111; color: #eee; padding: 2rem; }
+  h1 { margin-bottom: 2rem; color: #0f0; }
+  .cards { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+  .card {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 1.5rem;
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .card h2 { font-size: 1rem; color: #aaa; text-transform: uppercase; letter-spacing: 2px; }
+  .card h2 span { padding: 2px 8px; border-radius: 4px; margin-right: 6px; font-size: 0.75rem; }
+  .get  { background: #1a4a1a; } .get  h2 span { background: #0a0; color: #fff; }
+  .post { background: #1a3a4a; } .post h2 span { background: #07a; color: #fff; }
+  .del  { background: #4a1a1a; } .del  h2 span { background: #a00; color: #fff; }
+  .cgi  { background: #2a2a1a; } .cgi  h2 span { background: #770; color: #fff; }
+
+  input[type="file"] { display: none; }
+  label.file-btn, button.send-btn {
+    display: block;
+    width: 100%;
+    padding: 0.6rem;
+    border-radius: 5px;
+    border: 1px solid #555;
+    cursor: pointer;
+    text-align: center;
+    font-family: monospace;
+    font-size: 0.9rem;
+    background: #222;
+    color: #ccc;
+    transition: background 0.2s;
+  }
+  label.file-btn:hover, button.send-btn:hover { background: #333; }
+  .selected-file { font-size: 0.75rem; color: #888; min-height: 1em; word-break: break-all; }
+  input[type="text"] {
+    width: 100%;
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 5px;
+    color: #eee;
+    padding: 0.5rem;
+    font-family: monospace;
+    font-size: 0.85rem;
+  }
+  .response {
+    background: #0d0d0d;
+    border: 1px solid #333;
+    border-radius: 5px;
+    padding: 0.75rem;
+    font-size: 0.75rem;
+    color: #9f9;
+    min-height: 60px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .response.err { color: #f66; }
+  .status { font-size: 0.7rem; color: #666; }
+</style>
+</head>
+<body>
+<h1>// webserv tester</h1>
+<div class="cards">
+
+  <!-- GET -->
+  <div class="card get">
+    <h2><span>GET</span> Download File</h2>
+    <input type="text" id="get-path" placeholder="/upload/upload_1776332086" value="/upload/">
+    <button class="send-btn" onclick="doGet()">Send GET → Download</button>
+    <div class="status" id="get-status"></div>
+    <div class="response" id="get-res">—</div>
+  </div>
+
+  <!-- POST -->
+  <div class="card post">
+    <h2><span>POST</span> Upload File</h2>
+    <input type="file" id="post-file" onchange="showFile(this,'post-name')">
+    <label class="file-btn" for="post-file">Select file</label>
+    <div class="selected-file" id="post-name">no file selected</div>
+    <input type="text" id="post-path" placeholder="/path (e.g. /uploads/)" value="/uploads/">
+    <button class="send-btn" onclick="doPost()">Send POST</button>
+    <div class="status" id="post-status"></div>
+    <div class="response" id="post-res">—</div>
+  </div>
+
+  <!-- DELETE -->
+  <div class="card del">
+    <h2><span>DEL</span> Delete File</h2>
+    <input type="file" id="del-file" onchange="showFile(this,'del-name')">
+    <label class="file-btn" for="del-file">Select file</label>
+    <div class="selected-file" id="del-name">no file selected</div>
+    <input type="text" id="del-path" placeholder="/path/to/file" value="/uploads/">
+    <button class="send-btn" onclick="doDelete()">Send DELETE</button>
+    <div class="status" id="del-status"></div>
+    <div class="response" id="del-res">—</div>
+  </div>
+
+  <!-- CGI -->
+  <div class="card cgi">
+    <h2><span>CGI</span> Execute Script</h2>
+    <input type="file" id="cgi-file" onchange="showFile(this,'cgi-name')">
+    <label class="file-btn" for="cgi-file">Select file (body)</label>
+    <div class="selected-file" id="cgi-name">no file selected</div>
+    <input type="text" id="cgi-path" placeholder="/cgi-bin/hello.py" value="/cgi-bin/hello.py">
+    <button class="send-btn" onclick="doCgi()">Execute CGI</button>
+    <div class="status" id="cgi-status"></div>
+    <div class="response" id="cgi-res">—</div>
+  </div>
+
+</div>
+
+<script>
+function showFile(input, labelId) {
+  const el = document.getElementById(labelId);
+  el.textContent = input.files[0] ? input.files[0].name : 'no file selected';
+}
+
+async function send(method, path, body, contentType, resId, statusId) {
+  const res = document.getElementById(resId);
+  const sta = document.getElementById(statusId);
+  res.className = 'response';
+  res.textContent = 'sending…';
+  sta.textContent = '';
+  try {
+    const opts = { method };
+    if (body) {
+      opts.body = body;
+      if (contentType) opts.headers = { 'Content-Type': contentType };
+    }
+    const r = await fetch(path, opts);
+    sta.textContent = `HTTP ${r.status} ${r.statusText}`;
+    const text = await r.text();
+    res.textContent = text || '(empty body)';
+    if (!r.ok) res.className = 'response err';
+  } catch (e) {
+    res.className = 'response err';
+    res.textContent = e.message;
+    sta.textContent = 'network error';
+  }
+}
+
+function doGet() {
+  const path = document.getElementById('get-path').value.trim();
+  if (!path) { alert('enter server path'); return; }
+  const sta = document.getElementById('get-status');
+  const res = document.getElementById('get-res');
+  sta.textContent = `GET ${path}`;
+  res.textContent = 'downloading…';
+  const a = document.createElement('a');
+  a.href = path;
+  a.download = path.split('/').pop() || 'download';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => res.textContent = 'download triggered', 500);
+}
+
+function doPost() {
+  const file = document.getElementById('post-file').files[0];
+  const path = document.getElementById('post-path').value.trim() || '/';
+  if (!file) { alert('select a file first'); return; }
+  const form = new FormData();
+  form.append('file', file, file.name);
+  send('POST', path, form, null, 'post-res', 'post-status');
+}
+
+function doDelete() {
+  const file = document.getElementById('del-file').files[0];
+  const pathInput = document.getElementById('del-path').value.trim();
+  const path = file ? pathInput + (pathInput.endsWith('/') ? file.name : '') : pathInput;
+  if (!path) { alert('set path'); return; }
+  send('DELETE', path, null, null, 'del-res', 'del-status');
+}
+
+function doCgi() {
+  const file = document.getElementById('cgi-file').files[0];
+  const path = document.getElementById('cgi-path').value.trim() || '/cgi-bin/hello.py';
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = () => send('POST', path, reader.result, file.type || 'application/octet-stream', 'cgi-res', 'cgi-status');
+    reader.readAsText(file);
+  } else {
+    send('GET', path, null, null, 'cgi-res', 'cgi-status');
+  }
+}
+</script>
+</body>
+</html>
