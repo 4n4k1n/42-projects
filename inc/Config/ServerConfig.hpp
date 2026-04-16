@@ -7,6 +7,7 @@ class ServerConfig {
 	public:
 		int port;
 		std::string host;
+		std::string server_name;
 		std::string index;
 		std::string root;
 		bool auto_index;

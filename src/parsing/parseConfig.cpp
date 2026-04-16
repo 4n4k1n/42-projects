@@ -65,8 +65,11 @@ void ConfigParser::checkIfDup(Config& config) {
 	for (int i = 0; i < (int)config.servers.size(); i++) {
 		for (int j = i + 1; j < (int)config.servers.size(); j++) {
 			if (config.servers[i].host == config.servers[j].host &&
-				config.servers[i].port == config.servers[j].port)
-				throw std::runtime_error("Duplicate server: " + config.servers[i].host + ":" + std::to_string(config.servers[i].port));
+				config.servers[i].port == config.servers[j].port) {
+				if (config.servers[i].server_name.empty() || config.servers[j].server_name.empty() ||
+					config.servers[i].server_name == config.servers[j].server_name)
+					throw std::runtime_error("Duplicate server: " + config.servers[i].host + ":" + std::to_string(config.servers[i].port));
+			}
 		}
 	}
 }
@@ -119,6 +122,11 @@ void ConfigParser::parseServer(std::stringstream& ss, Config& config, std::size_
 			token = nextToken(ss, line);
 			requireSingleTrailingSemicolon(token, line, "host");
 			server.host = stripSemicolon(token);
+		}
+		else if (token == "server_name") {
+			token = nextToken(ss, line);
+			requireSingleTrailingSemicolon(token, line, "server_name");
+			server.server_name = stripSemicolon(token);
 		}
 		else if (token == "root") {
 			token = nextToken(ss, line);
