@@ -149,27 +149,36 @@ std::string response(const HttpRequest &request, const std::vector<LocationConfi
 		if (loc->clientMaxBodySize != -1 && loc->clientMaxBodySize < (long int)request._body.size())
 			return errorResponse(413, "Request body too large: " + std::to_string(request._body.size()) + " bytes");
 
-		if (!loc->uploadDir.empty()) {
-			size_t pos = request._path.find_last_of('/');
-			std::string filename = request._path.substr(pos + 1);
+		// Extract filename from URI
+		size_t pos = request._path.find_last_of('/');
+		std::string filename = request._path.substr(pos + 1);
+		bool has_filename = !filename.empty();
 
-			if (filename.empty()) {
-				auto now = std::chrono::system_clock::now();
-				auto timestamp = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
-				filename = "upload_" + std::to_string(timestamp);
-			}
-
-			file_path = loc->uploadDir + "/" + filename;
+		// Generate filename if URI doesn't contain one
+		if (!has_filename) {
+			auto now = std::chrono::system_clock::now();
+			auto timestamp = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
+			filename = "upload_" + std::to_string(timestamp);
 		}
+
+		// Construct final file path
+		if (!loc->uploadDir.empty()) {
+			// uploadDir set: always use uploadDir + filename
+			file_path = loc->uploadDir + "/" + filename;
+		} else if (!has_filename) {
+			// No uploadDir, no filename in URI: append generated filename to directory
+			file_path = file_path + "/" + filename;
+		}
+		// else: file_path already resolved correctly from URI
+
 		status = post_method(file_path, request._body);
+
+		if (status >= 400)
+			return errorResponse(status, "Upload failed");
 
 		HttpResponse response(status);
 		response.setHeader("Content-Type", "application/json");
-
-		// Extract filename from file_path to return to client
-		size_t pos = file_path.find_last_of('/');
-		std::string created_filename = (pos != std::string::npos) ? file_path.substr(pos + 1) : file_path;
-		response.body = "{\"status\": \"success\", \"filename\": \"" + created_filename + "\"}";
+		response.body = "{\"status\": \"success\", \"filename\": \"" + filename + "\"}";
 		return response.build();
 	}
 	else if (request._method == DELETE) {
