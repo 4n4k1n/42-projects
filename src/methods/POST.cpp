@@ -19,7 +19,7 @@ int	post_method(const std::string &file_path, const std::string &content) {
 	if (!dir.empty() && !std::filesystem::exists(dir))
 		std::filesystem::create_directories(dir);
 
-	std::ofstream file(file_path, std::ios::app);
+	std::ofstream file(file_path, std::ios::trunc);
 
 	if (!file.is_open()) {
 		std::cerr << RED << "POST 500: failed to open file: " << file_path << " (" << strerror(errno) << ")" << RESET << std::endl;
