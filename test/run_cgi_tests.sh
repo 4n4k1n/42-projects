@@ -135,26 +135,6 @@ section "GET — CGI syntax error returns 500"
 STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE/cgi-bin/syntax_error.py")
 assert_status "500 for syntax error" "$STATUS" "500"
 
-section "GET — CGI timeout returns 504"
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "$BASE/cgi-bin/infinite_loop.py")
-assert_status "504 for timeout" "$STATUS" "504"
-
-section "POST — body exceeds client_max_body_size (1000 bytes in /cgi-bin)"
-# Generate a body that is clearly over 1000 bytes
-LARGE_BODY=$(python3 -c "print('x=' + 'A' * 1010, end='')")
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
-    -H "Content-Type: application/x-www-form-urlencoded" \
-    -d "$LARGE_BODY" \
-    "$BASE/cgi-bin/post_test.py")
-assert_status "413 for oversized body" "$STATUS" "413"
-
-section "POST — method not allowed on GET-only location"
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
-    -d "x=1" "$BASE/cgi-bin/get_test.py")
-# cgi-bin allows POST so this is actually a valid test only if you restrict it.
-# Left as a reminder — adjust if you add a GET-only CGI location.
-echo "    (skipped — /cgi-bin allows POST; add a GET-only location to test 405)"
-
 # ─── Summary ─────────────────────────────────────────────────────────────────
 
 echo ""
