@@ -1,0 +1,10 @@
+
+curl http://localhost:8080/
+curl http://localhost:8081/
+
+curl --resolve example.com:8080:127.0.0.1 http://example.com:8080/
+curl --resolve other.com:8080:127.0.0.1 http://other.com:8080/
+
+curl http://localhost:8080/doesnotexist
+
+curl -X POST -H "Content-Type: plain/text" --data "THIS IS WAY TOO LONG FOR THE BODY LIMIT SET ABOVE" http://localhost:8080/uploads

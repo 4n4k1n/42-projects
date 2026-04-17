@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  process-monitor:
+    build: .
+    container_name: process-monitor
+
+    # Required: Run with host PID namespace to access host processes
+    pid: host
+
+    # Required: Privileged mode to use nsenter
+    privileged: true
+
+    environment:
+      # Configure the process to monitor
+      PROCESS_NAME: "your-process-name"
+      # Command to restart the process on the host
+      PROCESS_COMMAND: "/path/to/your/process --args"
+      # Check interval in seconds
+      CHECK_INTERVAL: 10
+
+    volumes:
+      # Optional: Mount log directory for persistence
+      - ./logs:/var/log
+
+    restart: unless-stopped
