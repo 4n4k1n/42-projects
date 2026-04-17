@@ -88,7 +88,7 @@
     <input type="file" id="post-file" onchange="showFile(this,'post-name')">
     <label class="file-btn" for="post-file">Select file</label>
     <div class="selected-file" id="post-name">no file selected</div>
-    <input type="text" id="post-path" placeholder="/path (e.g. /uploads/)" value="/uploads/">
+    <input type="text" id="post-path" placeholder="/path (e.g. /upload/)" value="/upload/">
     <button class="send-btn" onclick="doPost()">Send POST</button>
     <div class="status" id="post-status"></div>
     <div class="response" id="post-res">—</div>
@@ -100,7 +100,7 @@
     <input type="file" id="del-file" onchange="showFile(this,'del-name')">
     <label class="file-btn" for="del-file">Select file</label>
     <div class="selected-file" id="del-name">no file selected</div>
-    <input type="text" id="del-path" placeholder="/path/to/file" value="/uploads/">
+    <input type="text" id="del-path" placeholder="/path/to/file" value="/upload/">
     <button class="send-btn" onclick="doDelete()">Send DELETE</button>
     <div class="status" id="del-status"></div>
     <div class="response" id="del-res">—</div>
