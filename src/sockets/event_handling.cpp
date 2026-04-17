@@ -37,6 +37,7 @@ Connection create_client_socket(Connection con)
 	client_socket._fd_flag = CLIENT_FD;
 	client_socket._write_index = 0;
 	client_socket._serverConfig = con._serverConfig;
+	client_socket._vhosts = con._vhosts;
 
 	struct sockaddr_in client_addr;
 	socklen_t client_addr_len = sizeof(client_addr);
@@ -84,6 +85,19 @@ void handle_pollin_request(Connection &con)
 		con._fullReq = con._fullReq.parseRequest(headers);
 		if (!request_body_complete(con, con._fullReq, delimiter_pos))
 			return;
+
+		std::string host_hdr = con._fullReq.headers["host"];
+		size_t colon = host_hdr.find(':');
+		if (colon != std::string::npos)
+			host_hdr = host_hdr.substr(0, colon);
+		for (size_t i = 0; i < con._vhosts.size(); ++i)
+		{
+			if (con._vhosts[i].server_name == host_hdr)
+			{
+				con._serverConfig = con._vhosts[i];
+				break;
+			}
+		}
 
 		con._write_buffer = response(con._fullReq, con._serverConfig.locations, con);
 		if (con._cgi_state != CGI_RUNNING)
