@@ -113,6 +113,11 @@ std::string response(const HttpRequest &request, const std::vector<LocationConfi
 		if (dot_pos != std::string::npos) {
 			std::string extension = file_path.substr(dot_pos);
 			if (extension == loc->cgiExtensions) {
+				int file_status = checkFile(file_path, request._method);
+				if (file_status != 200)
+					return errorResponse(file_status, "CGI script not found: " + file_path);
+				if (request._method == POST && loc->clientMaxBodySize != -1 && loc->clientMaxBodySize < (long int)request._body.size())
+					return errorResponse(413, "Request body too large: " + std::to_string(request._body.size()) + " bytes");
 				HttpRequest &mutable_request = const_cast<HttpRequest&>(request);
 				status = processCgi(mutable_request, file_path, loc->cgiPath, conn);
 
